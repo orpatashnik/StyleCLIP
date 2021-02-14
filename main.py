@@ -21,26 +21,7 @@ def get_lr(t, initial_lr, rampdown=0.25, rampup=0.05):
     return initial_lr * lr_ramp
 
 
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--description", type=str, required=True, help="the text that guides the editing/generation")
-    parser.add_argument("--ckpt", type=str, default="stylegan2-ffhq-config-f.pt", help="pretrained StyleGAN2 weights")
-    parser.add_argument("--size", type=int, default=1024, help="StyleGAN resolution")
-    parser.add_argument("--lr_rampup", type=float, default=0.05)
-    parser.add_argument("--lr", type=float, default=0.1)
-    parser.add_argument("--step", type=int, default=300, help="number of optimization steps")
-    parser.add_argument("--mode", type=str, choices=["edit", "free_generation"], required=True, help="choose between edit an image an generate a free one")
-    parser.add_argument("--l2_lambda", type=float, default=0.008, help="weight of the latent distance (used for editing only)")
-    parser.add_argument("--latent_path", type=str, default=None, help="starts the optimization from the given latent code if provided. Otherwose, starts from"
-                                                                      "the mean latent in a free generation, and from a random one in editing. "
-                                                                      "Expects a .pt format")
-    parser.add_argument("--truncation", type=float, default=0.7, help="used only for the initial latent vector, and only when a latent code path is"
-                                                                      "not provided")
-    parser.add_argument("--save_intermidiate_image_every", type=int, default=20, help="if > 0 then saves intermidate results during the optimization")
-    parser.add_argument("--results_dir", type=str, default="results")
-
-    args = parser.parse_args()
+def main(args):
     text_inputs = torch.cat([clip.tokenize(args.description)]).cuda()
     os.makedirs(args.results_dir, exist_ok=True)
 
@@ -76,8 +57,6 @@ if __name__ == "__main__":
 
         img_gen, _ = g_ema([latent], input_is_latent=True, randomize_noise=False)
 
-        batch, channel, height, width = img_gen.shape
-
         c_loss = clip_loss(img_gen, text_inputs)
 
         if args.mode == "edit":
@@ -90,13 +69,12 @@ if __name__ == "__main__":
         loss.backward()
         optimizer.step()
 
-
         pbar.set_description(
             (
                 f"loss: {loss.item():.4f};"
             )
         )
-        if args.save_intermidiate_image_every > 0 and i % args.save_intermidiate_image_every == 0:
+        if args.save_intermediate_image_every > 0 and i % args.save_intermediate_image_every == 0:
             with torch.no_grad():
                 img_gen, _ = g_ema([latent], input_is_latent=True, randomize_noise=False)
 
@@ -110,6 +88,32 @@ if __name__ == "__main__":
     else:
         final_result = img_gen
 
-    torchvision.utils.save_image(img_gen, os.path.join(args.results_dir, "final_result.png"), normalize=True, scale_each=True, range=(-1, 1))
+    return final_result
+
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--description", type=str, required=True, help="the text that guides the editing/generation")
+    parser.add_argument("--ckpt", type=str, default="stylegan2-ffhq-config-f.pt", help="pretrained StyleGAN2 weights")
+    parser.add_argument("--size", type=int, default=1024, help="StyleGAN resolution")
+    parser.add_argument("--lr_rampup", type=float, default=0.05)
+    parser.add_argument("--lr", type=float, default=0.1)
+    parser.add_argument("--step", type=int, default=300, help="number of optimization steps")
+    parser.add_argument("--mode", type=str, choices=["edit", "free_generation"], required=True, help="choose between edit an image an generate a free one")
+    parser.add_argument("--l2_lambda", type=float, default=0.008, help="weight of the latent distance (used for editing only)")
+    parser.add_argument("--latent_path", type=str, default=None, help="starts the optimization from the given latent code if provided. Otherwose, starts from"
+                                                                      "the mean latent in a free generation, and from a random one in editing. "
+                                                                      "Expects a .pt format")
+    parser.add_argument("--truncation", type=float, default=0.7, help="used only for the initial latent vector, and only when a latent code path is"
+                                                                      "not provided")
+    parser.add_argument("--save_intermediate_image_every", type=int, default=20, help="if > 0 then saves intermidate results during the optimization")
+    parser.add_argument("--results_dir", type=str, default="results")
+
+    args = parser.parse_args()
+
+    result_image = main(args)
+
+    torchvision.utils.save_image(result_image, os.path.join(args.results_dir, "final_result.png"), normalize=True, scale_each=True, range=(-1, 1))
 
 
