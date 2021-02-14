@@ -1,19 +1,37 @@
-# Editing and Generating Images Using StyleGAN And CLIP
+# Text-Guided Editing of Images (Using CLIP and StyleGAN)
 
-In this repo, we provide code for edit and generating images, by optimizing latent codes in the StyleGAN's latent space, guided by CLIP.
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/master/playground.ipynb)
+
+This repo contains a code and a few results of my experiments with StyleGAN and CLIP. 
+Given a text description, my goal was to edit a given image, or generate a one.
+The following diagram describes the way it works:
+
+![](img/arch.png)
+
+In this example, I took an image of Ariana Grande, inverted it using [e4e](https://github.com/omertov/encoder4editing),
+ and edited the image so Ariana will look more tanned. 
+ To keep the image close to the original, I also used an L2 loss between the optimized latent vector and the original one.
+
+Hope you will enjoy it like I did!
 
 ### Editing Examples
 
+Here are some examples, and first of all, some manipulated images of me :)
+The description I used to obtain each edited image is written above or below it.
+
 ![](img/me.png)
+
+And now a few celebs. The description I used to edit each image is written below it.
+
 ![](img/ariana.png)
 ![](img/federer.png)
 ![](img/styles.png)
 
 ### Setup
 
-We rely on the official implementation of [CLIP](https://github.com/openai/CLIP), 
+The code relies on the official implementation of [CLIP](https://github.com/openai/CLIP), 
 and the [Rosinality](https://github.com/rosinality/stylegan2-pytorch/) pytorch implementation of StyleGAN2.
-We modified some parts of the StyleGAN implementation, so that the whole implementation is native pytorch.
+Some parts of the StyleGAN implementation were modified, so that the whole implementation is native pytorch.
 
 #### Requirements
 - Anaconda
