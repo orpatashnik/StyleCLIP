@@ -1,22 +1,25 @@
 # Text-Guided Editing of Images (Using CLIP and StyleGAN)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/master/playground.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/playground.ipynb)
 
-This repo contains a code and a few results of my experiments with StyleGAN and CLIP. 
-Given a text description, my goal was to edit a given image, or generate a one.
-The following diagram describes the way it works:
+This repo contains a code and a few results of my experiments with StyleGAN and CLIP. Let's call it StyleCLIP. 
+Given a textual description, my goal was to edit a given image, or generate one.
+The following diagram illustrates the way it works:
 
 ![](img/arch.png)
 
 In this example, I took an image of Ariana Grande, inverted it using [e4e](https://github.com/omertov/encoder4editing),
- and edited the image so Ariana will look more tanned. 
- To keep the image close to the original, I also used an L2 loss between the optimized latent vector and the original one.
+ and edited the image so Ariana will look more tanned, using the text "A tanned woman".
+ To keep the image close to the original one, I also used a simple L2 loss between the optimized latent vector and the original one.
 
-Hope you will enjoy it like I did!
+I tried to apply edits that cannot be done with common traversal in latent space, for example, using celebs names as target direction (see below)!
+I hope you can be more creative.
+
+Try, it is really fun. (Hope you will enjoy it like I did!)
 
 ### Editing Examples
 
-Here are some examples, and first of all, some manipulated images of me :)
+Here are some examples, and first of all, some manipulated images of myself :)
 The description I used to obtain each edited image is written above or below it.
 
 ![](img/me.png)
@@ -47,13 +50,13 @@ pip install git+https://github.com/openai/CLIP.git
 
 ### Usage
 
-Given a desired text description, one can both edit a given image, or generate a random image that best fits to the description.
+Given a textual description, one can both edit a given image, or generate a random image that best fits to the description.
 Both operations can be done through the `main.py` script, or the notebook.
 
 #### Editing
 To edit an image set `--mode=edit`. Editing can be done on both provided latent vector, and on a random latent vector from StyleGAN's latent space.
-We recommend to adjust the `--l2_lambda` according to the desired edit. 
-From our experience, different edits require different values of this parameter.
+It is recommended to adjust the `--l2_lambda` according to the desired edit. 
+From my experience, different edits require different values of this parameter.
 
 #### Generating Free-style Images
 To generate a free-style image set `--mode=free_generation`.
