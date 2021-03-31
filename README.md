@@ -1,34 +1,74 @@
-# Text-Guided Editing of Images (Using CLIP and StyleGAN)
-
+# StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/playground.ipynb)
 
-This repo contains a code and a few results of my experiments with StyleGAN and CLIP. Let's call it StyleCLIP. 
-Given a textual description, my goal was to edit a given image, or generate one.
-The following diagram illustrates the way it works:
+![](img/teaser.png)
 
-![](img/arch.png)
+> **Abstract:** Inspired by the ability of StyleGAN to generate highly realistic
+images in a variety of domains, much recent work has
+focused on understanding how to use the latent spaces of
+StyleGAN to manipulate generated and real images. However,
+discovering semantically meaningful latent manipulations
+typically involves painstaking human examination of
+the many degrees of freedom, or an annotated collection
+of images for each desired manipulation. In this work, we
+explore leveraging the power of recently introduced Contrastive
+Language-Image Pre-training (CLIP) models in order
+to develop a text-based interface for StyleGAN image
+manipulation that does not require such manual effort. We
+first introduce an optimization scheme that utilizes a CLIP-based
+loss to modify an input latent vector in response to a
+user-provided text prompt. Next, we describe a latent mapper
+that infers a text-guided latent manipulation step for
+a given input image, allowing faster and more stable textbased
+manipulation. Finally, we present a method for mapping
+a text prompts to input-agnostic directions in StyleGAN’s
+style space, enabling interactive text-driven image
+manipulation. Extensive results and comparisons demonstrate
+the effectiveness of our approaches.
 
-In this example, I took an image of Ariana Grande, inverted it using [e4e](https://github.com/omertov/encoder4editing),
- and edited the image so Ariana will look more tanned, using the text "A tanned woman".
- To keep the image close to the original one, I also used a simple L2 loss between the optimized latent vector and the original one.
 
-I tried to apply edits that cannot be done with common traversal in latent space, for example, using celebs names as target direction (see below)!
-I hope you can be more creative.
+## Description
+Official Implementation of StyleCLIP, a method to manipulate images using a driving text. 
+Our method uses the generative power of a pretrained StyleGAN generator, and the visual-language power of CLIP.
+In the paper we present three methods: 
+- Latent vector optimization.
+- Latent mapper, trained to manipulate latent vectors according to a specific text description.
+- Global directions in the StyleSpace.
 
-Try, it is really fun. (Hope you will enjoy it like I did!)
+Currently the repository contains the code for the optimization only. 
+The code for the latent mapper and for the global directions will be released soon - stay tuned!
 
-### Editing Examples
+## Updates
+**31/3/2021** Upload paper to arxiv
 
-Here are some examples, and first of all, some manipulated images of myself :)
-The description I used to obtain each edited image is written above or below it.
+**14/2/2021** Initial version
+
+## Editing Examples
+
+In the following, we show some results obtained with our methods. 
+All images are real, and were inverted into the StyleGAN's latent space using [e4e](https://github.com/omertov/encoder4editing). 
+The driving text that was used for each edit appears below or above each image.
+
+#### Latent Optimization
 
 ![](img/me.png)
-
-And now a few celebs. The description I used to edit each image is written below it.
-
 ![](img/ariana.png)
 ![](img/federer.png)
 ![](img/styles.png)
+
+#### Latent Mapper
+
+![](img/mapper_hairstyle.png)
+
+#### Global Directions
+
+![](img/global_example_1.png)
+![](img/global_example_2.png)
+![](img/global_example_3.png)
+![](img/global_example_4.png)
+
+
+## Editing via Latent Vector Optimization
 
 ### Setup
 
@@ -56,7 +96,6 @@ Both operations can be done through the `main.py` script, or the notebook.
 #### Editing
 To edit an image set `--mode=edit`. Editing can be done on both provided latent vector, and on a random latent vector from StyleGAN's latent space.
 It is recommended to adjust the `--l2_lambda` according to the desired edit. 
-From my experience, different edits require different values of this parameter.
 
 #### Generating Free-style Images
 To generate a free-style image set `--mode=free_generation`.
