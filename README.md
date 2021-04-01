@@ -3,7 +3,12 @@
 
 ![](img/teaser.png)
 
-> **Abstract:** Inspired by the ability of StyleGAN to generate highly realistic
+> **StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery**<br>
+> Or Patashnik*, Zongze Wu*, Eli Shechtman, Daniel Cohen-Or, Dani Lischinski <br>
+> *Equal contribution, ordered alphabetically <br>
+> https://arxiv.org/abs/2103.17249
+>
+>**Abstract:** Inspired by the ability of StyleGAN to generate highly realistic
 images in a variety of domains, much recent work has
 focused on understanding how to use the latent spaces of
 StyleGAN to manipulate generated and real images. However,
