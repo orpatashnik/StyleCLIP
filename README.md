@@ -1,12 +1,13 @@
 # StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/playground.ipynb)
+<a href="https://www.youtube.com/watch?v=5icI0NgALnQ"><img src="https://img.shields.io/badge/-YouTube-red?&style=for-the-badge&logo=youtube&logoColor=white" height=20></a>
 
 ![](img/teaser.png)
 
 > **StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery**<br>
 > Or Patashnik*, Zongze Wu*, Eli Shechtman, Daniel Cohen-Or, Dani Lischinski <br>
 > *Equal contribution, ordered alphabetically <br>
-> https://arxiv.org/abs/2103.17249
+> https://arxiv.org/abs/2103.17249 <br>
 >
 >**Abstract:** Inspired by the ability of StyleGAN to generate highly realistic
 images in a variety of domains, much recent work has
@@ -44,7 +45,7 @@ Currently the repository contains the code for the optimization only.
 The code for the latent mapper and for the global directions will be released soon - stay tuned!
 
 ## Updates
-**31/3/2021** Upload paper to arxiv
+**31/3/2021** Upload paper to arxiv, and video to YouTube
 
 **14/2/2021** Initial version
 
@@ -105,3 +106,23 @@ It is recommended to adjust the `--l2_lambda` according to the desired edit.
 #### Generating Free-style Images
 To generate a free-style image set `--mode=free_generation`.
 
+## Related Works
+
+The global directions we find for editing are direction in the _S Space_, which was introduced and analyzed in [StyleSpace](https://arxiv.org/abs/2011.12799) (Wu et al).
+
+To edit real images, we inverted them to the StyleGAN's latent space using [e4e](https://arxiv.org/abs/2102.02766) (Tov et al.). 
+
+## Citation
+
+If you use this code for your research, please cite our paper:
+
+```
+@misc{patashnik2021styleclip,
+      title={StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery}, 
+      author={Or Patashnik and Zongze Wu and Eli Shechtman and Daniel Cohen-Or and Dani Lischinski},
+      year={2021},
+      eprint={2103.17249},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
+```
