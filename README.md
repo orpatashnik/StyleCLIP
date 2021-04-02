@@ -125,8 +125,8 @@ python RetrievalAPP.py --dataset_name $dataset_name
 ```
 
 ### parameters and tips 
-**neutral text**: 'a photo of a' + custom input  
-**target text**: 'a photo of a' + custom input   
+**neutral text**: 'a photo of a' + custom input  (please press enter after you modify the text)
+**target text**: 'a photo of a' + custom input   (please press enter after you modify the text)
 
 The attribute is controlled by (neutral, target) pairs: smile (face, smiling face), gender (female face, male face), blond hair (face with hair, face with blond hair), Hi-top fade (face with hair, face with Hi-top fade hair), blue eyes (face with eyes, face with blue eyes). More examples could be found in this [video](https://www.youtube.com/watch?v=5icI0NgALnQ). 
 
