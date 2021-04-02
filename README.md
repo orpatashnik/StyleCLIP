@@ -93,6 +93,19 @@ pip install ftfy regex tqdm
 pip install git+https://github.com/openai/CLIP.git
 ```
 
+### Usage
+
+Given a textual description, one can both edit a given image, or generate a random image that best fits to the description.
+Both operations can be done through the `main.py` script, or the notebook.
+
+#### Editing
+To edit an image set `--mode=edit`. Editing can be done on both provided latent vector, and on a random latent vector from StyleGAN's latent space.
+It is recommended to adjust the `--l2_lambda` according to the desired edit. 
+
+#### Generating Free-style Images
+To generate a free-style image set `--mode=free_generation`.
+
+
 ## Editing via Global Direction
   ```shell script
 
@@ -110,15 +123,17 @@ python GetCode.py --dataset_name $dataset_name --code_type 's_mean_std'
 python RetrievalAPP.py --dataset_name $dataset_name
 ```
 
+### parameters and tips 
 Thre are four parameters in our global direction method. 
 
-neutral text: 'a photo of a' + custom input  
-target text: 'a photo of a' + custom input   
+#### neutral text: 'a photo of a' + custom input  
+#### target text: 'a photo of a' + custom input   
 
 #The attribute is controled by (neutral, target) pairs: smile (face, smiling face), gender (female face, male face), blond hair (face with hair, face with blond hair), Hi-top fade (face with hair, face with Hi-top fade hair), blue hair (face with eyes, face with blue eyes)
 
-strength: manipulation strength, positive value means moving the image toward target direction 
-disentangle: disentanglement threshold, large value mean more disentangle, just a few channels will be manipulated, only the target attribute will change (for example, grey hair). Small value means less disentangle, a large number of channels will be manipulated, related attributes will also change (such as wrinkle, skin color, glasses). 
+#### strength: manipulation strength, positive value means moving the image toward target direction
+
+#### disentangle: disentanglement threshold, large value mean more disentangle, just a few channels will be manipulated, only the target attribute will change (for example, grey hair). Small value means less disentangle, a large number of channels will be manipulated, related attributes will also change (such as wrinkle, skin color, glasses). 
 
 Pratice tips: In terminal, for every manipulation, we will print the number of channel being manipulated, which is controled by attribue (neutral, target) and disentanglement threshold.
 
@@ -127,17 +142,6 @@ Pratice tips: In terminal, for every manipulation, we will print the number of c
 
 
 
-### Usage
-
-Given a textual description, one can both edit a given image, or generate a random image that best fits to the description.
-Both operations can be done through the `main.py` script, or the notebook.
-
-#### Editing
-To edit an image set `--mode=edit`. Editing can be done on both provided latent vector, and on a random latent vector from StyleGAN's latent space.
-It is recommended to adjust the `--l2_lambda` according to the desired edit. 
-
-#### Generating Free-style Images
-To generate a free-style image set `--mode=free_generation`.
 
 ## Related Works
 
