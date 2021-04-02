@@ -126,14 +126,14 @@ python RetrievalAPP.py --dataset_name $dataset_name
 ### parameters and tips 
 Thre are four parameters in our global direction method. 
 
-#### neutral text: 'a photo of a' + custom input  
-#### target text: 'a photo of a' + custom input   
+**neutral text**: 'a photo of a' + custom input  
+**target text**: 'a photo of a' + custom input   
 
 #The attribute is controled by (neutral, target) pairs: smile (face, smiling face), gender (female face, male face), blond hair (face with hair, face with blond hair), Hi-top fade (face with hair, face with Hi-top fade hair), blue hair (face with eyes, face with blue eyes)
 
-#### strength: manipulation strength, positive value means moving the image toward target direction
+**manipulation strength**: positive value means moving the image toward target direction
 
-#### disentangle: disentanglement threshold, large value mean more disentangle, just a few channels will be manipulated, only the target attribute will change (for example, grey hair). Small value means less disentangle, a large number of channels will be manipulated, related attributes will also change (such as wrinkle, skin color, glasses). 
+**disentanglement threshold**: large value mean more disentangle, just a few channels will be manipulated, only the target attribute will change (for example, grey hair). Small value means less disentangle, a large number of channels will be manipulated, related attributes will also change (such as wrinkle, skin color, glasses). 
 
 Pratice tips: In terminal, for every manipulation, we will print the number of channel being manipulated, which is controled by attribue (neutral, target) and disentanglement threshold.
 
