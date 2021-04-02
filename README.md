@@ -148,7 +148,7 @@ You can now play with:
 More examples could be found in the [video](https://www.youtube.com/watch?v=5icI0NgALnQ) and in the paper.
 
 
-#####Pratice Tips: 
+##### Pratice Tips: 
 In the terminal, for every manipulation, the number of channels being manipulated is printed (the number is controlled by the attribute (neutral, target) and the disentanglement threshold).
 
 1. For color transformation, usually 10-20 channels is enough. For large structure change (for example, Hi-top fade), usually 100-200 channels are required.
