@@ -93,6 +93,22 @@ pip install ftfy regex tqdm
 pip install git+https://github.com/openai/CLIP.git
 ```
 
+## Editing via Global Direction
+  ```shell script
+
+cd global
+
+# input dataset name 
+dataset_name='ffhq' # input dataset name, currently, only support ffhq
+
+# input prepare data 
+python GetCode.py --dataset_name $dataset_name --code_type 'w'
+python GetCode.py --dataset_name $dataset_name --code_type 's'
+python GetCode.py --dataset_name $dataset_name --code_type 's_mean_std'
+
+# interactively manipulation 
+python RetrievalAPP.py --dataset_name $dataset_name
+```
 
 ### Usage
 
