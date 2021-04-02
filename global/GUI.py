@@ -7,14 +7,14 @@ Created on Mon Mar  9 10:25:42 2020
 """
 
 import sys
-sys.path=['', '/usr/local/tensorflow/avx-avx2-gpu/2.0.0/python3.7/site-packages',
-          '/usr/local/torch/1.3/lib/python3.7/site-packages',
-          '/usr/local/matlab/2018b/lib/python3.7/site-packages', 
-          '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python37.zip', 
-          '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python3.7', 
-          '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python3.7/lib-dynload',
-          '/usr/lib/python3.7', '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python3.7/site-packages',
-          '/usr/local/lib/python3.7/dist-packages', '/usr/lib/python3/dist-packages']
+#sys.path=['', '/usr/local/tensorflow/avx-avx2-gpu/2.0.0/python3.7/site-packages',
+#          '/usr/local/torch/1.3/lib/python3.7/site-packages',
+#          '/usr/local/matlab/2018b/lib/python3.7/site-packages', 
+#          '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python37.zip', 
+#          '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python3.7', 
+#          '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python3.7/lib-dynload',
+#          '/usr/lib/python3.7', '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python3.7/site-packages',
+#          '/usr/local/lib/python3.7/dist-packages', '/usr/lib/python3/dist-packages']
 
 #sys.path=['', '/usr/local/tensorflow/avx-avx2-gpu/1.14.0/python3.7/site-packages', '/usr/local/matlab/2018b/lib/python3.7/site-packages', '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python37.zip', '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python3.7', '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python3.7/lib-dynload', '/usr/lib/python3.7', '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python3.7/site-packages', '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python3.7/site-packages/copkmeans-1.5-py3.7.egg', '/cs/labs/danix/wuzongze/pythonV/venv3.7/lib/python3.7/site-packages/spherecluster-0.1.7-py3.7.egg', '/usr/lib/python3/dist-packages', '/usr/local/lib/python3.7/dist-packages']
 
