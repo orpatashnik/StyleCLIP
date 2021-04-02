@@ -1,6 +1,8 @@
 # StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery
 
 Demo video: <a href="https://www.youtube.com/watch?v=5icI0NgALnQ"><img src="https://img.shields.io/badge/-YouTube-red?&style=for-the-badge&logo=youtube&logoColor=white" height=20></a>
+Optimization notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/optimization_playground.ipynb)
+Global directions notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/StyleCLIP_global.ipynb)
 
 ![](img/teaser.png)
 
@@ -78,7 +80,7 @@ In addition to the requirements mentioned before, you should have a pretrained S
 ### Usage
 
 Given a textual description, one can both edit a given image, or generate a random image that best fits to the description.
-Both operations can be done through the `main.py` script, or the `optimization_playground.ipynb` notebook ([![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/playground.ipynb)).
+Both operations can be done through the `main.py` script, or the `optimization_playground.ipynb` notebook ([![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/optimization_playground.ipynb)).
 
 #### Editing
 To edit an image set `--mode=edit`. Editing can be done on both provided latent vector, and on a random latent vector from StyleGAN's latent space.
