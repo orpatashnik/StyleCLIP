@@ -121,7 +121,7 @@ python GetCode.py --dataset_name $dataset_name --code_type 's'
 python GetCode.py --dataset_name $dataset_name --code_type 's_mean_std'
 
 # interactively manipulation 
-python RetrievalAPP.py --dataset_name $dataset_name
+python PlayInteractively.py --dataset_name $dataset_name
 ```
 
 ### parameters and tips 
