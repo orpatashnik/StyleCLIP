@@ -107,6 +107,7 @@ To generate a free-style image set `--mode=free_generation`.
 
 
 ## Editing via Global Direction
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/StyleCLIP_global.ipynb)
   ```shell script
 
 cd global
