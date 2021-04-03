@@ -21,7 +21,25 @@ def get_lr(t, initial_lr, rampdown=0.25, rampup=0.05):
     return initial_lr * lr_ramp
 
 
+def ensure_checkpoint_exists(model_weights_filename):
+    google_drive_paths = {
+        "stylegan2-ffhq-config-f.pt" : "https://drive.google.com/uc?id=1EM87UquaoQmk17Q8d5kYIAHqu0dkYqdT"
+    }
+    
+    if not os.path.isfile(model_weights_filename) and (model_weights_filename in google_drive_paths):
+        gdrive_url = google_drive_paths[model_weights_filename]
+        try:
+            from gdown import download as drive_download
+            drive_download(gdrive_url, model_weights_filename, quiet=False)
+        except ModuleNotFoundError:
+            print('gdown not found. pip3 install gdown or manually download it: ' + gdrive_url)
+            
+     if not os.path.isfile(model_weights_filename) and (model_weights_filename not in google_drive_paths):
+        print(model_weights_filename+' not found, you may need to manually download the model weights.')
+    
+
 def main(args):
+    ensure_checkpoint_exists(args.ckpt)
     text_inputs = torch.cat([clip.tokenize(args.description)]).cuda()
     os.makedirs(args.results_dir, exist_ok=True)
 
