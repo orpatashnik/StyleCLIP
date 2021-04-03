@@ -63,7 +63,7 @@ Specific requirements for each method are described in its section.
 To install CLIP please run the following commands:
   ```shell script
 conda install --yes -c pytorch pytorch=1.7.1 torchvision cudatoolkit=<CUDA_VERSION>
-pip install ftfy regex tqdm
+pip install ftfy regex tqdm gdown
 pip install git+https://github.com/openai/CLIP.git
 ```
 
@@ -75,7 +75,7 @@ pip install git+https://github.com/openai/CLIP.git
 Here, the code relies on the [Rosinality](https://github.com/rosinality/stylegan2-pytorch/) pytorch implementation of StyleGAN2.
 Some parts of the StyleGAN implementation were modified, so that the whole implementation is native pytorch.
 
-In addition to the requirements mentioned before, you should have a pretrained StyleGAN2 generator (can be downloaded from [here](https://drive.google.com/file/d/1EM87UquaoQmk17Q8d5kYIAHqu0dkYqdT/view?usp=sharing)).
+In addition to the requirements mentioned before, a pretrained StyleGAN2 generator will attempt to be downloaded, (or manually download from [here](https://drive.google.com/file/d/1EM87UquaoQmk17Q8d5kYIAHqu0dkYqdT/view?usp=sharing)).
 
 ### Usage
 
