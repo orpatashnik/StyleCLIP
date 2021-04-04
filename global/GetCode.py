@@ -1,29 +1,11 @@
-# Copyright (c) 2019, NVIDIA CORPORATION. All rights reserved.
-#
-# This work is licensed under the Creative Commons Attribution-NonCommercial
-# 4.0 International License. To view a copy of this license, visit
-# http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to
-# Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
-"""Minimal script for generating an image using pre-trained StyleGAN generator."""
+
 
 import os
-#os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-#os.environ["CUDA_VISIBLE_DEVICES"] = "1" #(or "1" or "2")
 import pickle
 import numpy as np
-import PIL.Image
-import dnnlib
-#import stylegan2_ada.dnnlib.tflib as tflib
-
-from dnnlib import tflib  #as tflib
-
-#import config
+from dnnlib import tflib  
 import tensorflow as tf 
-from PIL import Image
-import pickle
-from sklearn.decomposition import PCA,MiniBatchSparsePCA
-import matplotlib.pyplot as plt
 
 import argparse
 
@@ -31,11 +13,6 @@ def LoadModel(dataset_name):
     # Initialize TensorFlow.
     tflib.init_tf()
     model_path='./model/'
-#    if dataset_name=='ffhq':
-#        model_name='stylegan2-ffhq-config-f.pkl'
-#    elif dataset_name=='car':
-#        model_name='stylegan2-car-config-f.pkl'
-#    model_name='stylegan2-'+dataset_name+'-config-f.pkl'
     model_name=dataset_name+'.pkl'
     
     tmp=os.path.join(model_path,model_name)
@@ -51,18 +28,15 @@ def SelectName(layer_name,suffix):
     if suffix==None:
         tmp1='add:0' in layer_name 
         tmp2='shape=(?,' in layer_name
-#        tmp3='ToRGB' in layer_name or '_Run' in layer_name
         tmp4='G_synthesis_1' in layer_name
-        tmp= tmp1 and tmp2 and tmp4  # (not tmp3) and tmp4
+        tmp= tmp1 and tmp2 and tmp4  
     else:
-    #    subfix='/mod_weight/read:0'
-    #    subfix='/MatMul:0'
         tmp1=('/Conv0_up'+suffix) in layer_name 
         tmp2=('/Conv1'+suffix) in layer_name 
         tmp3=('4x4/Conv'+suffix) in layer_name 
         tmp4='G_synthesis_1' in layer_name
         tmp5=('/ToRGB'+suffix) in layer_name
-        tmp= (tmp1 or tmp2 or tmp3 or tmp5) and tmp4 #and (not tmp3) and tmp4
+        tmp= (tmp1 or tmp2 or tmp3 or tmp5) and tmp4 
     return tmp
 
 
@@ -83,10 +57,9 @@ def GetSNames(suffix):
 def SelectName2(layer_name):
     tmp1='mod_bias' in layer_name 
     tmp2='mod_weight' in layer_name
-    tmp3='ToRGB' in layer_name # or '_Run' in layer_name
-#    tmp4='G_synthesis_1' in layer_name
+    tmp3='ToRGB' in layer_name 
     
-    tmp= (tmp1 or tmp2) and (not tmp3) #and tmp4
+    tmp= (tmp1 or tmp2) and (not tmp3) 
     return tmp
 
 def GetKName(Gs):
@@ -108,45 +81,29 @@ def GetCode(Gs,random_state,num_img,num_once,dataset_name):
     
     dlatent_avg=Gs.get_var('dlatent_avg')
     
-    
-    
-#    latents=[]
-#    dlatents=[]
     dlatents=np.zeros((num_img,512),dtype='float32')
     for i in range(int(num_img/num_once)):
-#        print(i,int(num_img/num_once))
         src_latents =  rnd.randn(num_once, Gs.input_shape[1])
         src_dlatents = Gs.components.mapping.run(src_latents, None) # [seed, layer, component]
         
         # Apply truncation trick.
         if truncation_psi is not None and truncation_cutoff is not None:
-#            with tf.variable_scope('Truncation'):
                 layer_idx = np.arange(src_dlatents.shape[1])[np.newaxis, :, np.newaxis]
                 ones = np.ones(layer_idx.shape, dtype=np.float32)
                 coefs = np.where(layer_idx < truncation_cutoff, truncation_psi * ones, ones)
                 src_dlatents_np=lerp(dlatent_avg, src_dlatents, coefs)
                 src_dlatents=src_dlatents_np[:,0,:].astype('float32')
                 dlatents[(i*num_once):((i+1)*num_once),:]=src_dlatents
-#        latents.append(src_latents)
-#        dlatents.append(src_dlatents)
-#    latents=np.concatenate(latents)
-#    dlatents=np.concatenate(dlatents)
     print('get all z and w')
-#    np.save('results/npy/'+dataset_name+'/Z',latents)
-    
-#    tmp='results/npy/'+dataset_name+'/W_2M'
     
     tmp='./npy/'+dataset_name+'/W'
-#    dlatents=dlatents[:,None,:]
-#    dlatents=np.tile(dlatents,(1,Gs.components.synthesis.input_shape[1],1))
-    
     np.save(tmp,dlatents)
 
     
 def GetImg(Gs,num_img,num_once,dataset_name,save_name='images'):
     print('Generate Image')
     tmp='./npy/'+dataset_name+'/W.npy'
-    dlatents=np.load(tmp) #[:5_000,0,:,:]
+    dlatents=np.load(tmp) 
     fmt = dict(func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
     
     all_images=[]
@@ -154,25 +111,13 @@ def GetImg(Gs,num_img,num_once,dataset_name,save_name='images'):
         print(i)
         images=[]
         for k in range(num_once):
-#            i,k=0,0
-            tmp=dlatents[i*num_once+k]#[None,:]
-            
-#            tmp1=dlatents[i*num_once+k+51]
-#            tmp[:,-2:,:]=tmp1[:,-2:,:]
-            
+            tmp=dlatents[i*num_once+k]
             tmp=tmp[None,None,:]
             tmp=np.tile(tmp,(1,Gs.components.synthesis.input_shape[1],1))
-            
             image2= Gs.components.synthesis.run(tmp, randomize_noise=False, output_transform=fmt)
-            
-#            image2=Image.fromarray(image[0])
-#            image2=image2.resize((256,256))
-#            image2=np.array(image2)[None,:,:,:]
-            
             images.append(image2)
             
         images=np.concatenate(images)
-#        images=np.array(images)
         
         all_images.append(images)
         
@@ -200,13 +145,9 @@ def GetS(dataset_name,num_img):
             select_layers1,
             feed_dict={'G_synthesis_1/dlatents_in:0': dlatents})
     
-    
     layer_names=[layer.name for layer in select_layers1]
     save_tmp=[layer_names,all_s]
     return save_tmp
-#    tmp='./npy/'+dataset_name+'/'+save_name
-#    with open(tmp, "wb") as fp:   #Pickling
-#        pickle.dump(save_tmp, fp)
 
     
 
@@ -217,10 +158,6 @@ def convert_images_to_uint8(images, drange=[-1,1], nchw_to_nhwc=False):
     """
     if nchw_to_nhwc:
         images = np.transpose(images, [0, 2, 3, 1])
-#    scale = 255 / (drange[1] - drange[0])
-#    images = images * scale + (0.5 - drange[0] * scale)
-    
-#    images = (images - drange[0])/(drange[1] - drange[0])*255
     
     scale = 255 / (drange[1] - drange[0])
     images = images * scale + (0.5 - drange[0] * scale)
@@ -234,28 +171,18 @@ def GetCodeMS(dlatents):
         m=[]
         std=[]
         for i in range(len(dlatents)):
-            tmp= dlatents[i] #[:,0,0,:,0]
+            tmp= dlatents[i] 
             tmp_mean=tmp.mean(axis=0)
             tmp_std=tmp.std(axis=0)
             m.append(tmp_mean)
             std.append(tmp_std)
         return m,std
-#        code_mean=m
-#        code_std=std
-        
-#        code_mean2=np.concatenate(code_mean)
-#        code_std2=np.concatenate(code_std)
-        
-        
-        
-
 
 
 
 #%%
 if __name__ == "__main__":
     
-#    main()
     
     parser = argparse.ArgumentParser(description='Process some integers.')
     
@@ -265,9 +192,8 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     random_state=5
-    num_img=100_000 #100_000
+    num_img=100_000 
     num_once=1_000
-#    dataset_name='ffhq'
     dataset_name=args.dataset_name
     
     if not os.path.isfile('./model/'+dataset_name+'.pkl'):
@@ -287,7 +213,7 @@ if __name__ == "__main__":
         save_name='S'
         save_tmp=GetS(dataset_name,num_img=2_000)
         tmp='./npy/'+dataset_name+'/'+save_name
-        with open(tmp, "wb") as fp:   #Pickling
+        with open(tmp, "wb") as fp:
             pickle.dump(save_tmp, fp)
         
     elif args.code_type=='s_mean_std':
@@ -297,7 +223,7 @@ if __name__ == "__main__":
         save_tmp=[m,std]
         save_name='S_mean_std'
         tmp='./npy/'+dataset_name+'/'+save_name
-        with open(tmp, "wb") as fp:   #Pickling
+        with open(tmp, "wb") as fp:
             pickle.dump(save_tmp, fp)
     
     

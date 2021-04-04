@@ -1,31 +1,15 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Sat Apr 25 13:28:02 2020
-
-@author: wuzongze
-"""
 
 
 import os
-#os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-#os.environ["CUDA_VISIBLE_DEVICES"] = "1" #(or "1" or "2")
 import os.path
-import argparse
 import pickle
 import numpy as np
-import pandas as pd
-#from tqdm import tqdm
 import tensorflow as tf
 from dnnlib import tflib
-
-from PIL import Image,ImageDraw
-from scipy.stats import logistic
 from utils.visualizer import HtmlPageVisualizer
 
 
 def Vis(bname,suffix,out,rownames=None,colnames=None):
-#        bname='01-smiling'
     num_images=out.shape[0]
     step=out.shape[1]
     
@@ -45,9 +29,6 @@ def Vis(bname,suffix,out,rownames=None,colnames=None):
     
     for i in range(num_images):
         for k in range(step):
-#            i,k=0,0
-#                tmp=codes[i,k,:,:][None,:,:]
-#                image= self.Gs.components.synthesis.run(tmp, randomize_noise=True, output_transform=self.fmt)
             image=out[i,k,:,:,:]
             visualizer.set_cell(i, 1+k, image=image)
     
@@ -82,9 +63,6 @@ def LoadData(img_path):
 def LoadModel(model_path,model_name):
     # Initialize TensorFlow.
     tflib.init_tf()
-#    model_path='/cs/labs/danix/wuzongze/Gan_Manipulation/stylegan2/model/'
-#    model_name='stylegan2-ffhq-config-f.pkl'
-#    model_name='stylegan2-mega-config-f.pkl'
     tmp=os.path.join(model_path,model_name)
     with open(tmp, 'rb') as f:
         _, _, Gs = pickle.load(f)
@@ -97,10 +75,6 @@ def convert_images_to_uint8(images, drange=[-1,1], nchw_to_nhwc=False):
     """
     if nchw_to_nhwc:
         images = np.transpose(images, [0, 2, 3, 1])
-#    scale = 255 / (drange[1] - drange[0])
-#    images = images * scale + (0.5 - drange[0] * scale)
-    
-#    images = (images - drange[0])/(drange[1] - drange[0])*255
     
     scale = 255 / (drange[1] - drange[0])
     images = images * scale + (0.5 - drange[0] * scale)
@@ -114,7 +88,6 @@ def convert_images_from_uint8(images, drange=[-1,1], nhwc_to_nchw=False):
     """Convert a minibatch of images from uint8 to float32 with configurable dynamic range.
     Can be used as an input transformation for Network.run().
     """
-#    images = tf.cast(images, tf.float32)
     if nhwc_to_nchw:
         images=np.rollaxis(images, 3, 1)
     return images/ 255 *(drange[1] - drange[0])+ drange[0]
@@ -126,15 +99,13 @@ class Manipulator():
         self.img_path=self.file_path+'npy/'+dataset_name+'/'
         self.model_path=self.file_path+'model/'
         self.dataset_name=dataset_name
-#        self.model_name='stylegan2-'+dataset_name+'-config-f.pkl'
         self.model_name=dataset_name+'.pkl'
         
         self.alpha=[0] #manipulation strength 
         self.num_images=10
         self.img_index=0  #which image to start 
         self.viz_size=256
-        self.manipulate_layers=None
-#        self.classifer_path='/cs/labs/danix/wuzongze/Gan_Manipulation/interfacegan/binary_classifer/'
+        self.manipulate_layers=None #which layer to manipulate, list
         
         self.dlatents,self.s_names,self.mindexs,self.pindexs,self.code_mean,self.code_std=LoadData(self.img_path)
         
@@ -145,20 +116,16 @@ class Manipulator():
         self.num_layers=len(self.dlatents)
         
         self.Vis=Vis
-        
-
         self.noise_constant={}
-#        assign_op=[]
         
         for i in range(len(self.s_names)):
-#            tmp=self.noise_vars[i].get_shape().as_list()
             tmp1=self.s_names[i].split('/')
             if not 'ToRGB' in tmp1:
                 tmp1[-1]='random_normal:0'
                 size=int(tmp1[1].split('x')[0])
                 tmp1='/'.join(tmp1)
                 tmp=(1,1,size,size)
-                self.noise_constant[tmp1]=np.random.random(tmp)#np.zeros() #
+                self.noise_constant[tmp1]=np.random.random(tmp)
         
         tmp=self.Gs.components.synthesis.input_shape[1]
         d={}
@@ -168,13 +135,8 @@ class Manipulator():
         for i in range(len(names)):
             self.noise_constant[names[i]]=tmp[i]
         
-        
         self.fmt = dict(func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)
         self.img_size=self.Gs.output_shape[-1]
-        
-        
-#        self.GetCodeMS()
-        
     
     def GenerateImg(self,codes):
         
@@ -183,11 +145,8 @@ class Manipulator():
 
             
         out=np.zeros((num_images,step,self.img_size,self.img_size,3),dtype='uint8')
-#        out=[]
-#        with tf.control_dependencies([var.initializer for var in self.noise_vars]): # use same noise inputs for the entire minibatch
         for i in range(num_images):
             for k in range(step):
-
                 d={}
                 for m in range(len(self.s_names)):
                     d[self.s_names[m]]=codes[m][i,k][None,:]  #need to change
@@ -196,10 +155,6 @@ class Manipulator():
                 img=tflib.run('G_synthesis_1/images_out:0', d)
                 image=convert_images_to_uint8(img, nchw_to_nhwc=True)
                 out[i,k,:,:,:]=image[0]
-#                out.append(image[0])
-#        out=np.array(out,dtype='uint8')
-#        tmp=image[0].shape
-#        out=out.reshape((self.num_images,self.step,tmp[0],tmp[1],tmp[2]))
         return out
     
     
@@ -211,9 +166,6 @@ class Manipulator():
         dlatent_tmp2=[np.tile(tmp[:,None],(1,step,1)) for tmp in dlatent_tmp1] # (10, 7, 512)
 
         l=np.array(self.alpha)
-#        print('using self.l')
-        
-        
         l=l.reshape(
                     [step if axis == 1 else 1 for axis in range(dlatent_tmp2[0].ndim)])
         
@@ -224,11 +176,9 @@ class Manipulator():
         elif self.manipulate_layers is None:
             tmp=np.arange(len(boundary_tmp))
         else:
-#            print('ffff')
             raise ValueError('manipulate_layers is wrong')
             
         for i in tmp:
-#            print(i)
             dlatent_tmp2[i]+=l*boundary_tmp[i]
         
         codes=[]
@@ -251,7 +201,6 @@ class Manipulator():
             else:
                 boundary_tmp.append(tmp[bname])
         
-        
         codes=self.MSCode(dlatent_tmp,boundary_tmp)
             
         out=self.GenerateImg(codes)
@@ -262,7 +211,6 @@ class Manipulator():
             dlatent_tmp=[tmp[self.img_index:(self.img_index+self.num_images)] for tmp in self.dlatents]
         
         boundary_tmp=[[] for i in range(len(self.dlatents))]
-#        tmp=self.boundary[self.manipulate_layers[0]].shape[1]
         
         #'only manipulate 1 layer and one channel'
         assert len(self.manipulate_layers)==1 
@@ -272,7 +220,6 @@ class Manipulator():
         tmp1=np.zeros(tmp)
         tmp1[cindex]=self.code_std[ml][cindex]  #1
         boundary_tmp[ml]=tmp1
-        
         
         codes=self.MSCode(dlatent_tmp,boundary_tmp)
         out=self.GenerateImg(codes)
@@ -287,25 +234,9 @@ class Manipulator():
         return all_s
         
     
-#    def GetCodeMS(self):
-#        m=[]
-#        std=[]
-#        for i in range(len(self.dlatents)):
-#            tmp= self.dlatents[i] #[:,0,0,:,0]
-#            tmp_mean=tmp.mean(axis=0)
-#            tmp_std=tmp.std(axis=0)
-#            m.append(tmp_mean)
-#            std.append(tmp_std)
-#        
-#        self.code_mean=m
-#        self.code_std=std
-#        
-#        self.code_mean2=np.concatenate(self.code_mean)
-#        self.code_std2=np.concatenate(self.code_std)
-        
-        
-        
-        
+    
+    
+    
     
 
 
@@ -317,7 +248,6 @@ if __name__ == "__main__":
     
     
     #%%
-#    M.step=1
     M.alpha=[-5,0,5]
     M.num_images=20
     lindex,cindex=6,501
