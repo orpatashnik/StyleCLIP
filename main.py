@@ -10,6 +10,7 @@ from tqdm import tqdm
 from clip_loss import CLIPLoss
 from stylegan2.model import Generator
 import clip
+from utils import ensure_checkpoint_exists
 
 
 
@@ -22,6 +23,7 @@ def get_lr(t, initial_lr, rampdown=0.25, rampup=0.05):
 
 
 def main(args):
+    ensure_checkpoint_exists(args.ckpt)
     text_inputs = torch.cat([clip.tokenize(args.description)]).cuda()
     os.makedirs(args.results_dir, exist_ok=True)
 
