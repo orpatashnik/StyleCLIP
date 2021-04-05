@@ -125,8 +125,10 @@ cd global
 # input dataset name 
 dataset_name='ffhq' 
 
-# pretrained StyleGAN2 model from standard [NVlabs implementation](https://github.com/NVlabs/stylegan2) will be download automatically 
-#for custom StyleGAN2 or StyleGAN2-ada model, please place the model under ./StyleCLIP/global/model/ folder
+# Pretrained StyleGAN2 model from standard [NVlabs implementation](https://github.com/NVlabs/stylegan2) will be download automatically.
+# Pretrained StyleGAN2-ada model could be download from https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada/pretrained/ .
+# For custom StyleGAN2 or StyleGAN2-ada model, please place the model under ./StyleCLIP/global/model/ folder.
+
 
 # input prepare data 
 python GetCode.py --dataset_name $dataset_name --code_type 'w'
