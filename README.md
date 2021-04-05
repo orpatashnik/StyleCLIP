@@ -4,7 +4,9 @@ Demo video: <a href="https://www.youtube.com/watch?v=5icI0NgALnQ"><img src="http
 Optimization notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/optimization_playground.ipynb)
 Global directions notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/StyleCLIP_global.ipynb)
 
-
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=5icI0NgALnQ"><img src='https://github.com/orpatashnik/StyleCLIP/blob/main/img/StyleCLIP_gif.gif' width=600 ></a>
+</p>
 
 
 ![](img/teaser.png)
