@@ -125,9 +125,9 @@ cd global
 # input dataset name 
 dataset_name='ffhq' 
 
-# Pretrained StyleGAN2 model from standard [NVlabs implementation](https://github.com/NVlabs/stylegan2) will be download automatically.
-# Pretrained StyleGAN2-ada model could be download from https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada/pretrained/ .
-# For custom StyleGAN2 or StyleGAN2-ada model, please place the model under ./StyleCLIP/global/model/ folder.
+# pretrained StyleGAN2 model from standard [NVlabs implementation](https://github.com/NVlabs/stylegan2) will be download automatically.
+# pretrained StyleGAN2-ada model could be download from https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada/pretrained/ .
+# for custom StyleGAN2 or StyleGAN2-ada model, please place the model under ./StyleCLIP/global/model/ folder.
 
 
 # input prepare data 
@@ -135,7 +135,8 @@ python GetCode.py --dataset_name $dataset_name --code_type 'w'
 python GetCode.py --dataset_name $dataset_name --code_type 's'
 python GetCode.py --dataset_name $dataset_name --code_type 's_mean_std'
 
-# preprocess (this may take a few hours). We precompute the results for StyleGAN2 on ffhq, StyleGAN2-ada on afhqdog, afhqcat. For these model, we can skip the preprocess step.
+# preprocess (this may take a few hours). 
+# we precompute the results for StyleGAN2 on ffhq, StyleGAN2-ada on afhqdog, afhqcat. For these model, we can skip the preprocess step.
 python SingleChannel.py --dataset_name $dataset_name
 
 # generated image to be manipulated ( this operation will generate and replace the w_plu.npy and .jpg images in './data/dataset_name/' folder. If you you want to keep the original data, please rename the original folder.)
