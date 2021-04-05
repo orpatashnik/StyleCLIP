@@ -56,7 +56,7 @@ Currently, the repository contains the code for the optimization and for the glo
 The work is still in progress -- stay tuned!
 
 ## Updates
-**6/4/2021** Add support for custom StyleGAN2 and StyleGAN2-ada model, and also custom images
+**6/4/2021** Add support for custom StyleGAN2 and StyleGAN2-ada models, and also custom images
 
 **2/4/2021** Add the global directions code (a local GUI and a colab notebook)
 
