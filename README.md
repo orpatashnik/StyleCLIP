@@ -5,6 +5,7 @@ Global directions notebook: [![Open In Colab](https://colab.research.google.com/
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=5icI0NgALnQ"><img src='https://github.com/orpatashnik/StyleCLIP/blob/main/img/StyleCLIP_gif.gif' width=600 ></a>
+  
   Check our full demo video here: <a href="https://www.youtube.com/watch?v=5icI0NgALnQ"><img src="https://img.shields.io/badge/-YouTube-red?&style=for-the-badge&logo=youtube&logoColor=white" height=20></a>
 </p>
 
