@@ -139,7 +139,8 @@ python GetCode.py --dataset_name $dataset_name --code_type 's_mean_std'
 # we precompute the results for StyleGAN2 on ffhq, StyleGAN2-ada on afhqdog, afhqcat. For these model, we can skip the preprocess step.
 python SingleChannel.py --dataset_name $dataset_name
 
-# generated image to be manipulated ( this operation will generate and replace the w_plu.npy and .jpg images in './data/dataset_name/' folder. If you you want to keep the original data, please rename the original folder.)
+# generated image to be manipulated 
+# this operation will generate and replace the w_plu.npy and .jpg images in './data/dataset_name/' folder. If you you want to keep the original data, please rename the original folder.
 # To use custom images, please use e4e encoder to generate latents.pt, and place it in './data/dataset_name/' folder, and add --real flag while running this function.
 # You may skip this step if you want to manipulate the real human faces we prepare in ./data/ffhq/ folder.   
 python GetGUIData.py --dataset_name $dataset_name
