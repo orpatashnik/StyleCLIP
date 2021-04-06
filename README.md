@@ -1,7 +1,8 @@
 # StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery
 
-Optimization notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/optimization_playground.ipynb)
-Global directions notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/StyleCLIP_global.ipynb)
+Optimization notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/optimization_playground.ipynb)
+Global directions notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/StyleCLIP_global.ipynb)
+Mapper notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/mapper_playground.ipynb)
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=5icI0NgALnQ"><img src='https://github.com/orpatashnik/StyleCLIP/blob/main/img/StyleCLIP_gif.gif' width=600 ></a>
@@ -56,6 +57,8 @@ Currently, the repository contains the code for the optimization and for the glo
 The work is still in progress -- stay tuned!
 
 ## Updates
+**6/4/2021** Add mapper training and inference (including a jupyter notebook) code
+
 **6/4/2021** Add support for custom StyleGAN2 and StyleGAN2-ada models, and also custom images
 
 **2/4/2021** Add the global directions code (a local GUI and a colab notebook)
@@ -90,7 +93,7 @@ In addition to the requirements mentioned before, a pretrained StyleGAN2 generat
 ### Usage
 
 Given a textual description, one can both edit a given image, or generate a random image that best fits to the description.
-Both operations can be done through the `main.py` script, or the `optimization_playground.ipynb` notebook ([![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/optimization_playground.ipynb)).
+Both operations can be done through the `main.py` script, or the `optimization_playground.ipynb` notebook ([![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/optimization_playground.ipynb)).
 
 #### Editing
 To edit an image set `--mode=edit`. Editing can be done on both provided latent vector, and on a random latent vector from StyleGAN's latent space.
@@ -99,11 +102,51 @@ It is recommended to adjust the `--l2_lambda` according to the desired edit.
 #### Generating Free-style Images
 To generate a free-style image set `--mode=free_generation`.
 
+## Editing via Latent Mapper
+Here, we provide the code for the latent mapper. The mapper is trained to learn *residuals* from a given latent vector, according to the driving text.
+The code for the mapper is in `mapper/`.
+
+### Setup
+As in the optimization, the code relies on [Rosinality](https://github.com/rosinality/stylegan2-pytorch/) pytorch implementation of StyleGAN2.
+In addition the the StyleGAN weights, it is neccessary to have weights for the facial recognition network used in the ID loss. 
+The weights can be downloaded from [here](https://drive.google.com/file/d/1KW7bjndL3QG3sxBbZxreGHigcCCpsDgn/view?usp=sharing).
+
+The mapper is trained on latent vectors. It is recommended to train on *inverted real images*. 
+To this end, we provide the CelebA-HQ that was inverted by e4e:
+[train set](https://drive.google.com/file/d/1gof8kYc_gDLUT4wQlmUdAtPnQIlCO26q/view?usp=sharing), [test set](https://drive.google.com/file/d/1j7RIfmrCoisxx3t-r-KC02Qc8barBecr/view?usp=sharing).
+
+### Usage
+
+#### Training
+- The main training script is placed in `mapper/scripts/train.py`.
+- Training arguments can be found at `mapper/options/train_options.py`.
+- Intermediate training results are saved to opts.exp_dir. This includes checkpoints, train outputs, and test outputs.
+Additionally, if you have tensorboard installed, you can visualize tensorboard logs in opts.exp_dir/logs.
+Note that
+- To resume a training, please provide `--checkpoint_path`.
+- `--description` is where you provide the driving text.
+- If you perform an edit that is not supposed to change "colors" in the image, it is recommended to use the flag `--no_fine_mapper`.
+
+Example for training a mapper for the moahwk hairstyle:
+```bash
+cd mapper
+python train.py --exp_dir ../results/mohawk_hairstyle --no_fine_mapper --description "mohawk hairstyle"
+```
+All configurations for the examples shown in the paper are provided there.
+
+#### Inference
+- The main inferece script is placed in `mapper/scripts/inference.py`.
+- Inference arguments can be found at `mapper/options/test_options.py`.
+- Adding the flag `--couple_outputs` will save image containing the input and output images side-by-side.
+
+Pretrained models for variuos edits are provided. Please refer to `utils.py` for the complete links list.
+
+We also provide a notebook for performing inference with the mapper Mapper notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/mapper_playground.ipynb)
 
 ## Editing via Global Direction
 
 Here we provide GUI for editing images with the global directions. 
-We provide both a jupyter notebook [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/StyleCLIP_global.ipynb),
+We provide both a jupyter notebook [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/StyleCLIP_global.ipynb),
 and the GUI used in the [video](https://www.youtube.com/watch?v=5icI0NgALnQ).
 For both, the linear direction are computed in **real time**.
 The code is located at `global/`.
@@ -218,7 +261,9 @@ The driving text that was used for each edit appears below or above each image.
 
 The global directions we find for editing are direction in the _S Space_, which was introduced and analyzed in [StyleSpace](https://arxiv.org/abs/2011.12799) (Wu et al).
 
-To edit real images, we inverted them to the StyleGAN's latent space using [e4e](https://arxiv.org/abs/2102.02766) (Tov et al.). 
+To edit real images, we inverted them to the StyleGAN's latent space using [e4e](https://arxiv.org/abs/2102.02766) (Tov et al.).
+
+The code strcuture of the mapper is heavily based on [pSp](https://github.com/eladrich/pixel2style2pixel). 
 
 ## Citation
 

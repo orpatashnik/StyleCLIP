@@ -7,8 +7,8 @@ import torchvision
 from torch import optim
 from tqdm import tqdm
 
-from clip_loss import CLIPLoss
-from stylegan2.model import Generator
+from criteria.clip_loss import CLIPLoss
+from models.stylegan2.model import Generator
 import clip
 from utils import ensure_checkpoint_exists
 
@@ -27,7 +27,7 @@ def main(args):
     text_inputs = torch.cat([clip.tokenize(args.description)]).cuda()
     os.makedirs(args.results_dir, exist_ok=True)
 
-    g_ema = Generator(args.size, 512, 8)
+    g_ema = Generator(args.stylegan_size, 512, 8)
     g_ema.load_state_dict(torch.load(args.ckpt)["g_ema"], strict=False)
     g_ema.eval()
     g_ema = g_ema.cuda()
@@ -46,7 +46,7 @@ def main(args):
     latent = latent_code_init.detach().clone()
     latent.requires_grad = True
 
-    clip_loss = CLIPLoss()
+    clip_loss = CLIPLoss(args)
 
     optimizer = optim.Adam([latent], lr=args.lr)
 
@@ -96,13 +96,13 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--description", type=str, required=True, help="the text that guides the editing/generation")
-    parser.add_argument("--ckpt", type=str, default="stylegan2-ffhq-config-f.pt", help="pretrained StyleGAN2 weights")
-    parser.add_argument("--size", type=int, default=1024, help="StyleGAN resolution")
+    parser.add_argument("--description", type=str, default="a person with purple hair", help="the text that guides the editing/generation")
+    parser.add_argument("--ckpt", type=str, default="../pretrained_models/stylegan2-ffhq-config-f.pt", help="pretrained StyleGAN2 weights")
+    parser.add_argument("--stylegan_size", type=int, default=1024, help="StyleGAN resolution")
     parser.add_argument("--lr_rampup", type=float, default=0.05)
     parser.add_argument("--lr", type=float, default=0.1)
     parser.add_argument("--step", type=int, default=300, help="number of optimization steps")
-    parser.add_argument("--mode", type=str, choices=["edit", "free_generation"], required=True, help="choose between edit an image an generate a free one")
+    parser.add_argument("--mode", type=str, default="edit", choices=["edit", "free_generation"], help="choose between edit an image an generate a free one")
     parser.add_argument("--l2_lambda", type=float, default=0.008, help="weight of the latent distance (used for editing only)")
     parser.add_argument("--latent_path", type=str, default=None, help="starts the optimization from the given latent code if provided. Otherwose, starts from"
                                                                       "the mean latent in a free generation, and from a random one in editing. "
