@@ -146,7 +146,7 @@ Here we provide GUI for editing images with the global directions.
 We provide both a jupyter notebook [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/StyleCLIP_global.ipynb),
 and the GUI used in the [video](https://www.youtube.com/watch?v=5icI0NgALnQ).
 For both, the linear direction are computed in **real time**.
-The code is located at `global/`.
+The code is located at `global_directions/`.
 
   
 ### Setup
@@ -162,14 +162,14 @@ It is required to have TensorFlow, version 1.14 or 1.15 (`conda install -c anaco
 To start the local GUI please run the following commands:
 
 ```shell script
-cd global
+cd global_directions
 
 # input dataset name 
 dataset_name='ffhq' 
 
 # pretrained StyleGAN2 model from standard [NVlabs implementation](https://github.com/NVlabs/stylegan2) will be download automatically.
 # pretrained StyleGAN2-ada model could be download from https://nvlabs-fi-cdn.nvidia.com/stylegan2-ada/pretrained/ .
-# for custom StyleGAN2 or StyleGAN2-ada model, please place the model under ./StyleCLIP/global/model/ folder.
+# for custom StyleGAN2 or StyleGAN2-ada model, please place the model under ./StyleCLIP/global_directions/model/ folder.
 
 
 # input prepare data 
@@ -195,7 +195,7 @@ python PlayInteractively.py --dataset_name $dataset_name
 As shown in the video, to edit an image it is requires to write a _neutral text_ and a _target text_. 
 To operate the GUI, please do the following:
 - Maximize the window size
-- Double click on the left square to choose an image. The images are taken from  `global/data/ffhq`, and the corresponding latent vectors are in `global/data/ffhq/w_plus.npy`.
+- Double click on the left square to choose an image. The images are taken from  `global_directions/data/ffhq`, and the corresponding latent vectors are in `global_directions/data/ffhq/w_plus.npy`.
 - Type a neutral text, then press enter
 - Modify the target text so that it will contain the target edit, then press enter.
 
