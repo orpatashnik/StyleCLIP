@@ -2,3 +2,6 @@
 /latents/
 /results/
 /mine/
+.DS_Store
+.cog
+global_directions/e4e_ffhq_encode.pt

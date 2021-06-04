@@ -6,7 +6,7 @@ import pickle
 import numpy as np
 import tensorflow as tf
 from dnnlib import tflib
-from global_directions.utils.visualizer import HtmlPageVisualizer
+from utils.visualizer import HtmlPageVisualizer
 
 
 def Vis(bname,suffix,out,rownames=None,colnames=None):
@@ -94,7 +94,7 @@ def convert_images_from_uint8(images, drange=[-1,1], nhwc_to_nchw=False):
 
 
 class Manipulator():
-    def __init__(self,dataset_name='ffhq'):
+    def __init__(self,dataset_name='ffhq', sess=None):
         self.file_path='./'
         self.img_path=self.file_path+'npy/'+dataset_name+'/'
         self.model_path=self.file_path+'model/'
@@ -108,8 +108,8 @@ class Manipulator():
         self.manipulate_layers=None #which layer to manipulate, list
         
         self.dlatents,self.s_names,self.mindexs,self.pindexs,self.code_mean,self.code_std=LoadData(self.img_path)
-        
-        self.sess=tf.InteractiveSession()
+
+        self.sess = sess or tf.InteractiveSession()
         init = tf.global_variables_initializer()
         self.sess.run(init)
         self.Gs=LoadModel(self.model_path,self.model_name)
