@@ -1,6 +1,7 @@
 import argparse
 import math
 import os
+import numpy as np
 
 import torch
 import torchvision
@@ -80,7 +81,11 @@ def main(args):
             with torch.no_grad():
                 img_gen, _ = g_ema([latent], input_is_latent=True, randomize_noise=False)
 
-            torchvision.utils.save_image(img_gen, f"results/{str(i).zfill(5)}.png", normalize=True, range=(-1, 1))
+            torchvision.utils.save_image(img_gen, f"{args.results_dir}/{str(i).zfill(5)}.png", normalize=True, range=(-1, 1))
+            
+            if(args.save_vector):
+                np.savez(f'{args.results_dir}/w-{str(i).zfill(5)}.npz', w=latent.unsqueeze(0).detach().cpu().numpy())
+
 
     if args.mode == "edit":
         with torch.no_grad():
@@ -88,6 +93,8 @@ def main(args):
 
         final_result = torch.cat([img_orig, img_gen])
     else:
+        if(args.save_vector):
+            np.savez(f'{args.results_dir}/projected_w.npz', w=latent.unsqueeze(0).detach().cpu().numpy())
         final_result = img_gen
 
     return final_result
@@ -111,6 +118,7 @@ if __name__ == "__main__":
                                                                       "not provided")
     parser.add_argument("--save_intermediate_image_every", type=int, default=20, help="if > 0 then saves intermidate results during the optimization")
     parser.add_argument("--results_dir", type=str, default="results")
+    parser.add_argument('--save_vector', action='store_true')
 
     args = parser.parse_args()
 
