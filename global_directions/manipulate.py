@@ -6,7 +6,7 @@ import pickle
 import numpy as np
 import tensorflow as tf
 from dnnlib import tflib
-from utils.visualizer import HtmlPageVisualizer
+from global_directions.utils.visualizer import HtmlPageVisualizer
 
 
 def Vis(bname,suffix,out,rownames=None,colnames=None):

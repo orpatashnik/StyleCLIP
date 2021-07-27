@@ -1,39 +1,39 @@
-import tempfile
-from pathlib import Path
+import copy
 import os
-from argparse import Namespace
-import time
-import dlib
-import os
+import pickle
 import sys
+import tempfile
+import time
+from argparse import Namespace
+from pathlib import Path
+
+import clip
+import cog
+import dlib
+import matplotlib.pyplot as plt
 import numpy as np
-from PIL import Image
+import tensorflow as tf
 import torch
 import torchvision.transforms as transforms
-import tensorflow as tf
-import numpy as np
-import torch
-import clip
 from PIL import Image
-import pickle
-import copy
-import matplotlib.pyplot as plt
-from MapTS import GetFs, GetBoundary, GetDt
-from manipulate import Manipulator
-from dnnlib import tflib
 
 sys.path.insert(0, "/content")
 sys.path.insert(0, "/content/encoder4editing")
 
-from encoder4editing.utils.common import tensor2im
-from encoder4editing.utils.alignment import align_face
 from encoder4editing.models.psp import pSp
+from encoder4editing.utils.alignment import align_face
+from encoder4editing.utils.common import tensor2im
 
-import cog
+os.chdir("global_directions")
+sys.path.insert(0, ".")
 
+from dnnlib import tflib
+from manipulate import Manipulator
+from MapTS import GetBoundary, GetDt, GetFs
 
-class Model(cog.Model):
+class Predictor(cog.Predictor):
     def setup(self):
+
         print("starting setup")
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -46,8 +46,6 @@ class Model(cog.Model):
         self.sess = tf.Session(
             graph=self.graph, config=tf.ConfigProto(gpu_options=gpu_options)
         )
-
-        experiment_type = "ffhq_encode"
 
         self.experiment_args = {"model_path": "e4e_ffhq_encode.pt"}
         self.experiment_args["transform"] = transforms.Compose(
@@ -80,7 +78,7 @@ class Model(cog.Model):
             #tflib.init_tf()
 
             self.M = Manipulator(dataset_name="ffhq", sess=self.sess)
-            self.fs3 = np.load("./npy/ffhq/fs3.npy")
+            self.fs3 = np.load("npy/ffhq/fs3.npy")
             np.set_printoptions(suppress=True)
 
         print("setup complete")
@@ -112,12 +110,13 @@ class Model(cog.Model):
         manipulation_strength,
         disentanglement_threshold,
     ):
+
         # @title Align image
-        original_image = Image.open(str(input))
-        original_image = original_image.convert("RGB")
+        #original_image = Image.open(str(input))
+        #original_image = original_image.convert("RGB")
         input_image = self.run_alignment(str(input))
-        input_image = original_image
-        input_image.resize(self.resize_dims)
+        #input_image = original_image
+        input_image = input_image.resize(self.resize_dims)
 
         img_transforms = self.experiment_args["transform"]
         transformed_image = img_transforms(input_image)
