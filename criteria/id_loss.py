@@ -13,6 +13,7 @@ class IDLoss(nn.Module):
         self.pool = torch.nn.AdaptiveAvgPool2d((256, 256))
         self.face_pool = torch.nn.AdaptiveAvgPool2d((112, 112))
         self.facenet.eval()
+        self.facenet.cuda()
         self.opts = opts
 
     def extract_feats(self, x):

@@ -17,6 +17,7 @@ class TrainOptions:
 		self.parser.add_argument('--latents_test_path', default="test_faces.pt", type=str, help="The latents for the validation")
 		self.parser.add_argument('--train_dataset_size', default=5000, type=int, help="Will be used only if no latents are given")
 		self.parser.add_argument('--test_dataset_size', default=1000, type=int, help="Will be used only if no latents are given")
+		self.parser.add_argument('--work_in_stylespace', default=False, action='store_true', help="trains a mapper in S instead of W+")
 
 		self.parser.add_argument('--batch_size', default=2, type=int, help='Batch size for training')
 		self.parser.add_argument('--test_batch_size', default=1, type=int, help='Batch size for testing and inference')

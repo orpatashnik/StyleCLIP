@@ -4,10 +4,12 @@ from torch.nn import Module
 
 from models.stylegan2.model import EqualLinear, PixelNorm
 
+STYLESPACE_DIMENSIONS = [512 for _ in range(15)] + [256, 256, 256] + [128, 128, 128] + [64, 64, 64] + [32, 32]
+
 
 class Mapper(Module):
 
-    def __init__(self, opts):
+    def __init__(self, opts, latent_dim=512):
         super(Mapper, self).__init__()
 
         self.opts = opts
@@ -16,7 +18,7 @@ class Mapper(Module):
         for i in range(4):
             layers.append(
                 EqualLinear(
-                    512, 512, lr_mul=0.01, activation='fused_lrelu'
+                    latent_dim, latent_dim, lr_mul=0.01, activation='fused_lrelu'
                 )
             )
 
@@ -79,3 +81,48 @@ class LevelsMapper(Module):
 
         return out
 
+class FullStyleSpaceMapper(Module):
+
+    def __init__(self, opts):
+        super(FullStyleSpaceMapper, self).__init__()
+
+        self.opts = opts
+
+        for c, c_dim in enumerate(STYLESPACE_DIMENSIONS):
+            setattr(self, f"mapper_{c}", Mapper(opts, latent_dim=c_dim))
+
+    def forward(self, x):
+        out = []
+        for c, x_c in enumerate(x):
+            curr_mapper = getattr(self, f"mapper_{c}")
+            x_c_res = curr_mapper(x_c.view(x_c.shape[0], -1)).view(x_c.shape)
+            out.append(x_c_res)
+
+        return out
+
+
+class WithoutToRGBStyleSpaceMapper(Module):
+
+    def __init__(self, opts):
+        super(WithoutToRGBStyleSpaceMapper, self).__init__()
+
+        self.opts = opts
+
+        indices_without_torgb = list(range(1, len(STYLESPACE_DIMENSIONS), 3))
+        self.STYLESPACE_INDICES_WITHOUT_TORGB = [i for i in range(len(STYLESPACE_DIMENSIONS)) if i not in indices_without_torgb]
+
+        for c in self.STYLESPACE_INDICES_WITHOUT_TORGB:
+            setattr(self, f"mapper_{c}", Mapper(opts, latent_dim=STYLESPACE_DIMENSIONS[c]))
+
+    def forward(self, x):
+        out = []
+        for c in range(len(STYLESPACE_DIMENSIONS)):
+            x_c = x[c]
+            if c in self.STYLESPACE_INDICES_WITHOUT_TORGB:
+                curr_mapper = getattr(self, f"mapper_{c}")
+                x_c_res = curr_mapper(x_c.view(x_c.shape[0], -1)).view(x_c.shape)
+            else:
+                x_c_res = torch.zeros_like(x_c)
+            out.append(x_c_res)
+
+        return out

@@ -24,7 +24,9 @@ class StyleCLIPMapper(nn.Module):
 		self.load_weights()
 
 	def set_mapper(self):
-		if self.opts.mapper_type == 'SingleMapper':
+		if self.opts.work_in_stylespace:
+			mapper = latent_mappers.WithoutToRGBStyleSpaceMapper(self.opts)
+		elif self.opts.mapper_type == 'SingleMapper':
 			mapper = latent_mappers.SingleMapper(self.opts)
 		elif self.opts.mapper_type == 'LevelsMapper':
 			mapper = latent_mappers.LevelsMapper(self.opts)

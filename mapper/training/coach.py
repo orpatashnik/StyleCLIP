@@ -9,10 +9,11 @@ from torch.utils.tensorboard import SummaryWriter
 
 import criteria.clip_loss as clip_loss
 from criteria import id_loss
-from mapper.datasets.latents_dataset import LatentsDataset
+from mapper.datasets.latents_dataset import LatentsDataset, StyleSpaceLatentsDataset
 from mapper.styleclip_mapper import StyleCLIPMapper
 from mapper.training.ranger import Ranger
 from mapper.training import train_utils
+from mapper.training.train_utils import convert_s_tensor_to_list
 
 
 class Coach:
@@ -71,12 +72,21 @@ class Coach:
 		while self.global_step < self.opts.max_steps:
 			for batch_idx, batch in enumerate(self.train_dataloader):
 				self.optimizer.zero_grad()
-				w = batch
-				w = w.to(self.device)
+				if self.opts.work_in_stylespace:
+					w = convert_s_tensor_to_list(batch)
+					w = [c.to(self.device) for c in w]
+				else:
+					w = batch
+					w = w.to(self.device)
 				with torch.no_grad():
-					x, _ = self.net.decoder([w], input_is_latent=True, randomize_noise=False, truncation=1)
-				w_hat = w + 0.1 * self.net.mapper(w)
-				x_hat, w_hat = self.net.decoder([w_hat], input_is_latent=True, return_latents=True, randomize_noise=False, truncation=1)
+					x, _ = self.net.decoder([w], input_is_latent=True, randomize_noise=False, truncation=1, input_is_stylespace=self.opts.work_in_stylespace)
+				if self.opts.work_in_stylespace:
+					delta = self.net.mapper(w)
+					w_hat = [c + 0.1 * delta_c for (c, delta_c) in zip(w, delta)]
+					x_hat, _, w_hat = self.net.decoder([w_hat], input_is_latent=True, return_latents=True, randomize_noise=False, truncation=1, input_is_stylespace=True)
+				else:
+					w_hat = w + 0.1 * self.net.mapper(w)
+					x_hat, w_hat, _ = self.net.decoder([w_hat], input_is_latent=True, return_latents=True, randomize_noise=False, truncation=1)
 				loss, loss_dict = self.calc_loss(w, x, w_hat, x_hat)
 				loss.backward()
 				self.optimizer.step()
@@ -116,13 +126,22 @@ class Coach:
 			if batch_idx > 200:
 				break
 
-			w = batch
+			if self.opts.work_in_stylespace:
+				w = convert_s_tensor_to_list(batch)
+				w = [c.to(self.device) for c in w]
+			else:
+				w = batch
+				w = w.to(self.device)
 
 			with torch.no_grad():
-				w = w.to(self.device).float()
-				x, _ = self.net.decoder([w], input_is_latent=True, randomize_noise=True, truncation=1)
-				w_hat = w + 0.1 * self.net.mapper(w)
-				x_hat, _ = self.net.decoder([w_hat], input_is_latent=True, randomize_noise=True, truncation=1)
+				x, _ = self.net.decoder([w], input_is_latent=True, randomize_noise=False, truncation=1, input_is_stylespace=self.opts.work_in_stylespace)
+				if self.opts.work_in_stylespace:
+					delta = self.net.mapper(w)
+					w_hat = [c + 0.1 * delta_c for (c, delta_c) in zip(w, delta)]
+					x_hat, _, w_hat = self.net.decoder([w_hat], input_is_latent=True, return_latents=True, randomize_noise=False, truncation=1, input_is_stylespace=True)
+				else:
+					w_hat = w + 0.1 * self.net.mapper(w)
+					x_hat, w_hat, _ = self.net.decoder([w_hat], input_is_latent=True, return_latents=True, randomize_noise=False, truncation=1)
 				loss, cur_loss_dict = self.calc_loss(w, x, w_hat, x_hat)
 			agg_loss_dict.append(cur_loss_dict)
 
@@ -185,10 +204,16 @@ class Coach:
 					test_latents.append(test_latents_b)
 			test_latents = torch.cat(test_latents)
 
-		train_dataset_celeba = LatentsDataset(latents=train_latents.cpu(),
-		                                      opts=self.opts)
-		test_dataset_celeba = LatentsDataset(latents=test_latents.cpu(),
-		                                      opts=self.opts)
+		if self.opts.work_in_stylespace:
+			train_dataset_celeba = StyleSpaceLatentsDataset(latents=[l.cpu() for l in train_latents],
+			                                                opts=self.opts)
+			test_dataset_celeba = StyleSpaceLatentsDataset(latents=[l.cpu() for l in test_latents],
+			                                     opts=self.opts)
+		else:
+			train_dataset_celeba = LatentsDataset(latents=train_latents.cpu(),
+			                                      opts=self.opts)
+			test_dataset_celeba = LatentsDataset(latents=test_latents.cpu(),
+			                                      opts=self.opts)
 		train_dataset = train_dataset_celeba
 		test_dataset = test_dataset_celeba
 		print("Number of training samples: {}".format(len(train_dataset)))
@@ -208,7 +233,12 @@ class Coach:
 			loss_dict['loss_clip'] = float(loss_clip)
 			loss += loss_clip * self.opts.clip_lambda
 		if self.opts.latent_l2_lambda > 0:
-			loss_l2_latent = self.latent_l2_loss(w_hat, w)
+			if self.opts.work_in_stylespace:
+				loss_l2_latent = 0
+				for c_hat, c in zip(w_hat, w):
+					loss_l2_latent += self.latent_l2_loss(c_hat, c)
+			else:
+				loss_l2_latent = self.latent_l2_loss(w_hat, w)
 			loss_dict['loss_l2_latent'] = float(loss_l2_latent)
 			loss += loss_l2_latent * self.opts.latent_l2_lambda
 		loss_dict['loss'] = float(loss)

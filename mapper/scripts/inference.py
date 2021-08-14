@@ -10,10 +10,12 @@ import time
 
 from tqdm import tqdm
 
+from mapper.training.train_utils import convert_s_tensor_to_list
+
 sys.path.append(".")
 sys.path.append("..")
 
-from mapper.datasets.latents_dataset import LatentsDataset
+from mapper.datasets.latents_dataset import LatentsDataset, StyleSpaceLatentsDataset
 
 from mapper.options.test_options import TestOptions
 from mapper.styleclip_mapper import StyleCLIPMapper
@@ -34,8 +36,10 @@ def run(test_opts):
 	net.cuda()
 
 	test_latents = torch.load(opts.latents_test_path)
-	dataset = LatentsDataset(latents=test_latents.cpu(),
-										 opts=opts)
+	if opts.work_in_stylespace:
+		dataset = StyleSpaceLatentsDataset(latents=[l.cpu() for l in test_latents], opts=opts)
+	else:
+		dataset = LatentsDataset(latents=test_latents.cpu(), opts=opts)
 	dataloader = DataLoader(dataset,
 	                        batch_size=opts.test_batch_size,
 	                        shuffle=False,
@@ -51,9 +55,15 @@ def run(test_opts):
 		if global_i >= opts.n_images:
 			break
 		with torch.no_grad():
-			input_cuda = input_batch.cuda().float()
+			if opts.work_in_stylespace:
+				input_cuda = convert_s_tensor_to_list(input_batch)
+				input_cuda = [c.cuda() for c in input_cuda]
+			else:
+				input_cuda = input_batch
+				input_cuda = input_cuda.cuda()
+
 			tic = time.time()
-			result_batch = run_on_batch(input_cuda, net, test_opts.couple_outputs)
+			result_batch = run_on_batch(input_cuda, net, opts.couple_outputs, opts.work_in_stylespace)
 			toc = time.time()
 			global_time.append(toc - tic)
 
@@ -76,14 +86,21 @@ def run(test_opts):
 		f.write(result_str)
 
 
-def run_on_batch(inputs, net, couple_outputs=False):
+def run_on_batch(inputs, net, couple_outputs=False, stylespace=False):
 	w = inputs
 	with torch.no_grad():
-		w_hat = w + 0.1 * net.mapper(w)
-		x_hat, w_hat = net.decoder([w_hat], input_is_latent=True, return_latents=True, randomize_noise=False, truncation=1)
+		if stylespace:
+			delta = net.mapper(w)
+			w_hat = [c + 0.1 * delta_c for (c, delta_c) in zip(w, delta)]
+			x_hat, _, w_hat = net.decoder([w_hat], input_is_latent=True, return_latents=True,
+			                                   randomize_noise=False, truncation=1, input_is_stylespace=True)
+		else:
+			w_hat = w + 0.1 * net.mapper(w)
+			x_hat, w_hat, _ = net.decoder([w_hat], input_is_latent=True, return_latents=True,
+			                                   randomize_noise=False, truncation=1)
 		result_batch = (x_hat, w_hat)
 		if couple_outputs:
-			x, _ = net.decoder([w], input_is_latent=True, randomize_noise=False, truncation=1)
+			x, _ = net.decoder([w], input_is_latent=True, randomize_noise=False, truncation=1, input_is_stylespace=stylespace)
 			result_batch = (x_hat, w_hat, x)
 	return result_batch
 
