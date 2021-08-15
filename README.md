@@ -1,4 +1,4 @@
-# StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery
+# StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery (ICCV 2021 Oral)
 
 Optimization: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/optimization_playground.ipynb)
 Global directions: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/StyleCLIP_global.ipynb)
@@ -54,6 +54,8 @@ In the paper we present three methods:
 
 
 ## Updates
+**15/8/2021** Add support for StyleSpace in optimization and latent mapper methods
+
 **6/4/2021** Add mapper training and inference (including a jupyter notebook) code
 
 **6/4/2021** Add support for custom StyleGAN2 and StyleGAN2-ada models, and also custom images
