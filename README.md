@@ -271,12 +271,12 @@ The code strcuture of the mapper is heavily based on [pSp](https://github.com/el
 If you use this code for your research, please cite our paper:
 
 ```
-@misc{patashnik2021styleclip,
-      title={StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery}, 
-      author={Or Patashnik and Zongze Wu and Eli Shechtman and Daniel Cohen-Or and Dani Lischinski},
-      year={2021},
-      eprint={2103.17249},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@InProceedings{Patashnik_2021_ICCV,
+    author    = {Patashnik, Or and Wu, Zongze and Shechtman, Eli and Cohen-Or, Daniel and Lischinski, Dani},
+    title     = {StyleCLIP: Text-Driven Manipulation of StyleGAN Imagery},
+    booktitle = {Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
+    month     = {October},
+    year      = {2021},
+    pages     = {2085-2094}
 }
 ```
