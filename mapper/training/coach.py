@@ -187,7 +187,7 @@ class Coach:
 			train_latents = []
 			for b in range(self.opts.train_dataset_size // self.opts.batch_size):
 				with torch.no_grad():
-					_, train_latents_b = self.net.decoder([train_latents_z[b: b + self.opts.batch_size]],
+					_, train_latents_b = self.net.decoder([train_latents_z[b * self.opts.batch_size: (b + 1) * self.opts.batch_size]],
 														  truncation=0.7, truncation_latent=self.net.latent_avg, return_latents=True)
 					train_latents.append(train_latents_b)
 			train_latents = torch.cat(train_latents)
@@ -199,7 +199,7 @@ class Coach:
 			test_latents = []
 			for b in range(self.opts.test_dataset_size // self.opts.test_batch_size):
 				with torch.no_grad():
-					_, test_latents_b = self.net.decoder([test_latents_z[b: b + self.opts.test_batch_size]],
+					_, test_latents_b = self.net.decoder([test_latents_z[b * self.opts.test_batch_size: (b + 1) * self.opts.test_batch_size]],
 													  truncation=0.7, truncation_latent=self.net.latent_avg, return_latents=True)
 					test_latents.append(test_latents_b)
 			test_latents = torch.cat(test_latents)
