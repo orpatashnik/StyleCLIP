@@ -18,7 +18,6 @@ import copy
 import matplotlib.pyplot as plt
 from manipulate import Manipulator
 
-sys.path.append('/cs/labs/danix/wuzongze/Tansformer_Manipulation/CLIP/')
 import clip
 
 
@@ -198,7 +197,6 @@ if __name__ == "__main__":
     np.set_printoptions(suppress=True)
     #%%
     file_path='./npy/human/'
-    
     fs3=np.load(file_path+'fs3.npy')
     #%%
     img_indexs=np.arange(20)
