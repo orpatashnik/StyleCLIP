@@ -59,6 +59,8 @@ In the paper we present three methods:
 
 
 ## Updates
+**31/10/2022** Add support for global direction with torch implementation
+
 **15/8/2021** Add support for StyleSpace in optimization and latent mapper methods
 
 **6/4/2021** Add mapper training and inference (including a jupyter notebook) code
