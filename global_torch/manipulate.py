@@ -24,7 +24,7 @@ from PIL import Image
 import dnnlib
 import legacy
 import pickle
-from utils.visualizer import HtmlPageVisualizer
+from visualizer import HtmlPageVisualizer
 
 from torch_utils import misc
 import types
