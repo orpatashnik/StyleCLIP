@@ -6,8 +6,6 @@
 # distribution of this software and related documentation without an express
 # license agreement from NVIDIA CORPORATION is strictly prohibited.
 
-import sys
-sys.path.append('/cs/labs/danix/wuzongze/Gan_Manipulation/stylegan2_ada_pytorch/')
 
 import numpy as np
 import torch
