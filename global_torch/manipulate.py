@@ -102,28 +102,9 @@ def S2List(encoded_styles):
     return all_s
 
 
-# def lerp(a,b,t):
-#      return a + (b - a) * t
-
-# def Truncation(src_dlatents,dlatent_avg,truncation_psi,truncation_cutoff):
-#     layer_idx = np.arange(src_dlatents.shape[1])[np.newaxis, :, np.newaxis]
-#     ones = np.ones(layer_idx.shape, dtype=np.float32)
-    
-#     if truncation_cutoff is None:
-#         coefs = ones*truncation_psi
-#     else:
-#         coefs = np.where(layer_idx > truncation_cutoff, truncation_psi * ones, ones)
-#     src_dlatents_np=lerp(dlatent_avg, src_dlatents, coefs)
-#     return src_dlatents_np
-
 
 class Manipulator():
     def __init__(self,dataset_name='ffhq'):
-#        self.file_path='./'
-#        self.img_path=self.file_path+'npy/'+dataset_name+'/'
-#        self.model_path=self.file_path+'model/'
-#        self.dataset_name=dataset_name
-#        self.model_name=dataset_name+'.pkl'
         
         self.alpha=[0] #manipulation strength 
         self.num_images=10
@@ -362,44 +343,20 @@ class Manipulator():
     
 #%%
 if __name__ == "__main__":
-    # network_pkl='/cs/labs/danix/wuzongze/Gan_Manipulation/stylegan2_ada_pytorch/results/old/00006-joker_256-auto1-resumecustom/network-snapshot-000006.pkl'
-    # save_name='018547'
-    # network_pkl='/cs/labs/danix/wuzongze/Gan_Manipulation/stylegan2_ada_pytorch_original/results/00007-ffhq_256-mirror-auto4-noaug/network-snapshot-'+save_name+'.pkl'
-    # network_pkl='/cs/labs/danix/wuzongze/Gan_Manipulation/stylegan2/model/stylegan2-ffhq256-config-f.pkl'
-    network_pkl='/cs/labs/danix/wuzongze/Gan_Manipulation/stylegan2/model/stylegan2-human-config-f.pkl'
+    network_pkl='/cs/labs/danix/wuzongze/Gan_Manipulation/stylegan2/model/stylegan2-ffhq-config-f.pkl'
     device = torch.device('cuda')
-#    misc.copy_params_and_buffers(G2, G, require_all=False)
-    
     M=Manipulator()
     M.device=device
     G=M.LoadModel(network_pkl,device)
     M.G=G
     M.SetGParameters()
-    
-    #%%
-    num_img=11_000
+    num_img=100_000
     M.GenerateS(num_img=num_img)
     M.GetCodeMS()
-    
-    # num_img=100_000
-    # seed=5
-    # with torch.no_grad(): 
-    #     z = torch.from_numpy(np.random.RandomState(seed).randn(num_img, self.G.z_dim)).to(self.device)
-    #     ws = self.G.mapping(z=z,c=None,truncation_psi=self.truncation_psi,truncation_cutoff=self.truncation_cutoff)
-    #     encoded_styles=self.G.synthesis.W2S(ws)
-    
-    # all_s=S2List(encoded_styles)
+    np.set_printoptions(suppress=True)
     
     #%%
-    tmp='/cs/labs/danix/wuzongze/Gan_Manipulation/stylegan2/results/npy/ffhq256/S_Mean_Std'
-    with open(tmp, 'rb') as handle:
-        _,m,std = pickle.load(handle)
-    M.code_std=std[:len(M.dlatents)]
-    #%%
-    M.alpha=[0]
-#    M.alpha=[6,3,0,-3,-6]
-    # M.alpha=[24,16,8,0,-8,-16,-24]
-#    M.alpha=[40,20,0,-20,-40]
+    M.alpha=[24,16,8,0,-8,-16,-24]
     M.step=len(M.alpha)
     M.img_index=0
     M.num_images=10
@@ -409,150 +366,6 @@ if __name__ == "__main__":
     codes,out=M.EditOneC(bname) #dlatent_tmp
     tmp=str(M.manipulate_layers)+'_'+str(bname)
     M.Vis(tmp,'c',out)
-    #%%
-    M.alpha=[1,-2] # -2, 1
-    M.step=len(M.alpha)
-    M.num_images=1
-    lindex,cindex=6,501
-    
-    M.manipulate_layers=[lindex]
-    l_path='/cs/labs/danix/wuzongze/Gan_Manipulation/pytorch-CycleGAN-and-pix2pix/datasets/smile/train/'
-    
-    for j in range(10_000):
-        if j %1000==0:
-            print(j/1000)
-        M.img_index=j
-        
-        codes,out=M.EditOneC(cindex) #dlatent_tmp
-        
-        # img=Image.fromarray(out[0,0])
-        
-        im_AB = np.concatenate([out[0,0], out[0,1]], 1)
-        img=Image.fromarray(im_AB)
-        
-        tmp=str(j).zfill(6)+'.jpg'
-        
-        tmp1=os.path.join(l_path,tmp)
-        img.save(tmp1)
-    
-    
-    
-        #%%
-    tmp=np.load('/cs/labs/danix/wuzongze/Gan_Manipulation/stylegan2/results/npy/ffhq512/boundary_pose.npy') #boundary_pose,boundary_KidAdult
-    tmp=np.tile(tmp,(1,M.G.synthesis.num_ws,1))
-    tmp=torch.tensor(tmp).cuda()
-    tmp1=M.G.synthesis.W2S(tmp)
-    tmp1=M.S2List(tmp1)
-    
-    tmp2=np.zeros(tmp.shape)
-    tmp2=torch.tensor(tmp2).cuda()
-    tmp2=M.G.synthesis.W2S(tmp2)
-    tmp2=M.S2List(tmp2)
-    
-    boundary_tmp=[]
-    for i in range(5): #len(tmp1)
-        tmp=tmp1[i]-tmp2[i]
-        boundary_tmp.append(tmp)
-    
-    
-    
-    M.num_images=30
-    dlatent_tmp=[tmp[M.img_index:(M.img_index+M.num_images)] for tmp in M.dlatents]
-    
-    
-    M.alpha=np.array([-3,-2,-1,0,1,2,3])*5
-    codes=M.MSCode(dlatent_tmp,boundary_tmp)
-    out=M.GenerateImg(codes)
-    M.Vis('tmp','c',out)
-    
-    #%%
-    M.truncation_psi=1
-    
-    num_img=100_000
-    M.GenerateS(num_img=num_img)
-    
-    out=M.ShowImg(num_img=num_img)
-    
-    # M.Vis('tmp','c',out)
-    
-    # M.G.synthesis.b4.conv1.name
-    
-    save_path='/cs/labs/danix/wuzongze/Gan_Manipulation/stylegan2_ada_pytorch_original/results/00007-ffhq_256-mirror-auto4-noaug/img/'
-    with open(save_path+'S_'+save_name, 'wb') as handle:
-        pickle.dump(M.dlatents, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    
-    np.save(save_path+save_name,out[:,0])
-    
-    #%%
-    save_name='020563'
-    save_path='/cs/labs/danix/wuzongze/Gan_Manipulation/stylegan2_ada_pytorch_original/results/00007-ffhq_256-mirror-auto4-noaug/img/'
-    
-    with open(save_path+'S_'+save_name, 'rb') as handle:
-        all_s = pickle.load(handle)
-    
-    s_flat=np.concatenate(all_s,axis=1)
-    np.save(save_path+'S_Flat_'+save_name,s_flat)
-    
-    #%%
-    '''
-    imgs=np.load(save_path+save_name+'.npy')
-    M.Vis('tmp2','c',imgs[:10,None,:])
-    
-    with open(save_path+'S_'+save_name, 'rb') as handle:
-        M.dlatents = pickle.load(handle)
-    
-    #%%
-    
-    tmp='/cs/labs/danix/wuzongze/Gan_Manipulation/stylegan2/results/npy/ffhq/S_mean_std'
-    with open(tmp, 'rb') as handle:
-        m,std = pickle.load(handle)
-    M.code_std=std[:len(M.dlatents)]
-    #%%
-    network_pkl='/cs/labs/danix/wuzongze/Gan_Manipulation/PTI/checkpoints/model_QERNCPWYXQOM_0.pt'
-    with open(network_pkl, 'rb') as f_new: 
-          G = torch.load(f_new).cuda()
-    M.G=G
-    
-    #%%
-    
-    img_index=11
-    num_layers=G.synthesis.num_ws
-#    w_plus=np.load('/cs/labs/danix/wuzongze/Gan_Manipulation/encoder4editing/img_invert/out_domain/latents.npy')[img_index,:num_layers][None,:]
-    w_plus=np.load('/cs/labs/danix/wuzongze/Gan_Manipulation/encoder4editing/img_invert/joker/latents.npy')[:,:num_layers]
-    ws=torch.tensor(w_plus, dtype=torch.float32, device=device)
-    
-    with torch.no_grad(): 
-        encoded_styles=G.synthesis.W2S(ws)
-        M.dlatents=M.S2List(encoded_styles)
-    #%%
-#    M.alpha=[0]
-#    M.alpha=[6,3,0,-3,-6]
-    M.alpha=[24,16,8,0,-8,-16,-24]
-#    M.alpha=[40,20,0,-20,-40]
-    M.step=len(M.alpha)
-    M.img_index=0
-    M.num_images=len(ws)
-    lindex,bname=9,376
-#    M.
-    M.manipulate_layers=[lindex]
-    codes,out=M.EditOneC(bname) #dlatent_tmp
-    tmp=str(M.manipulate_layers)+'_'+str(bname)
-    M.Vis(tmp,'c',out)
-    
-    
-    
-    
-    #%%
-    
-    network_pkl='/cs/labs/danix/wuzongze/Gan_Manipulation/stylegan2/model/stylegan2-ffhq-config-f.pkl'
-    with dnnlib.util.open_url(network_pkl) as fp:
-        tmp = legacy.load_network_pkl(fp)
-    
-    tmp1='/cs/labs/danix/wuzongze/Gan_Manipulation/PTI/pretrained_models/ffhq'
-    with open(tmp1, "wb") as fp:   #Pickling
-        pickle.dump(tmp, fp)
-    '''
-
 
 
 
