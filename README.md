@@ -5,8 +5,9 @@
 Optimization: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](http://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/optimization_playground.ipynb)
 Mapper: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/mapper_playground.ipynb)
 
-Global directions: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/StyleCLIP_global.ipynb)
-Global directions torch: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/StyleCLIP_global_torch.ipynb)
+Global directions Torch: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/StyleCLIP_global_torch.ipynb)
+Global directions TF1: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/orpatashnik/StyleCLIP/blob/main/notebooks/StyleCLIP_global.ipynb)
+
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=5icI0NgALnQ"><img src='https://github.com/orpatashnik/StyleCLIP/blob/main/img/StyleCLIP_gif.gif' width=600 ></a>
@@ -58,6 +59,8 @@ In the paper we present three methods:
 
 
 ## Updates
+**31/10/2022** Add support for global direction with torch implementation
+
 **15/8/2021** Add support for StyleSpace in optimization and latent mapper methods
 
 **6/4/2021** Add mapper training and inference (including a jupyter notebook) code
