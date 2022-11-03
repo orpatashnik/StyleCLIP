@@ -136,7 +136,7 @@ Note that
 Example for training a mapper for the moahwk hairstyle:
 ```bash
 cd mapper
-python train.py --exp_dir ../results/mohawk_hairstyle --no_fine_mapper --description "mohawk hairstyle"
+python scripts/train.py --exp_dir ../results/mohawk_hairstyle --no_fine_mapper --description "mohawk hairstyle"
 ```
 All configurations for the examples shown in the paper are provided there.
 
