@@ -137,6 +137,9 @@ if __name__ == "__main__":
     parser.add_argument("--results_dir", type=str, default="results")
     parser.add_argument('--ir_se50_weights', default='../pretrained_models/model_ir_se50.pth', type=str,
                              help="Path to facial recognition network used in ID loss")
+    parser.add_argument('--segmentation_model', default='linear_segmentation', type=str,
+                             help="Which segmentation model to use, either linear_segmentation, face_segmentation or stuff_segmentation")
+    
 
     args = parser.parse_args()
 
