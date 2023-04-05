@@ -551,10 +551,16 @@ class Generator(nn.Module):
             i = 2
 
         if return_all_layers:
-            result[f"layer_{i}"] = skip  # OR out ??
+            result[f"layer_{1}"] = skip  # OR out ??
 
-        for conv1, conv2, noise1, noise2, to_rgb in zip(
-            self.convs[::2], self.convs[1::2], noise[1::2], noise[2::2], self.to_rgbs
+        for ind, (conv1, conv2, noise1, noise2, to_rgb) in enumerate(
+            zip(
+                self.convs[::2],
+                self.convs[1::2],
+                noise[1::2],
+                noise[2::2],
+                self.to_rgbs,
+            )
         ):
             if not input_is_stylespace:
                 out, out_style1 = conv1(out, latent[:, i], noise=noise1)
@@ -586,7 +592,7 @@ class Generator(nn.Module):
                 i += 3
 
             if return_all_layers:
-                result[f"layer_{i}"] = skip  # OR out ??
+                result[f"layer_{ind+2}"] = skip  # OR out ??
 
         image = skip
 
