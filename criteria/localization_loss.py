@@ -136,7 +136,7 @@ class LocalizationLoss(nn.Module):
         self.opts = opts
         print("Loading Segmentation Models")
         segmentation_model_string = opts.segmentation_model
-        assert opts.segmentation_model_string in [
+        assert segmentation_model_string in [
             "linear_segmentation",
             "face_segmentation",
             "stuff_segmentation",
