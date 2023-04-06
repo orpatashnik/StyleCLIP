@@ -63,7 +63,7 @@ def get_semantic_parts(text):
     # returns the semantic parts according to the given text
 
     # FaceSegmentation ffhq
-    [
+    return [
         ["mouth", "u_lip", "l_lip"],
         ["skin"],
         ["l_eye", "r_eye"],
@@ -148,10 +148,10 @@ class LocalizationLoss(nn.Module):
             segmentation_model = _load_cocostuff_deeplabv2("")
             self.segmenation_model = StuffSegmentation(segmentation_model)
         elif segmentation_model_string == "face_segmentation":
-            segmentation_model = _load_face_bisenet_model("")
+            segmentation_model = _load_face_bisenet_model(
+                "../pretrained/face_bisnet/model.pth"
+            )
             self.segmenation_model = FaceSegmentation(segmentation_model)
-
-        self.generator = None
         # Add generator model to compute the localization on the different layers of the network
 
     ### Batch data should now be coming from the generator, instead of the direct image outoput of the gan
@@ -160,6 +160,26 @@ class LocalizationLoss(nn.Module):
         localization_loss = 0
         localization_layers = list(range(1, 14))
         localization_layer_weights = np.array([1.0] * len(localization_layers))
+        layer_to_resolution = {
+            0: 4,
+            1: 4,
+            2: 8,
+            3: 8,
+            4: 16,
+            5: 16,
+            6: 32,
+            7: 32,
+            8: 64,
+            9: 64,
+            10: 128,
+            11: 128,
+            12: 256,
+            13: 256,
+            14: 512,
+            15: 512,
+            16: 1024,
+            17: 1024,
+        }
         loss_functions = ["L1", "L2", "cos"]
         loss_function = loss_functions[1]
         mode = ""
@@ -206,7 +226,7 @@ class LocalizationLoss(nn.Module):
         for layer, layer_weight in zip(
             reversed(localization_layers), reversed(localization_layer_weights)
         ):
-            layer_res = gan_sample_generator.layer_to_resolution[layer]
+            layer_res = layer_to_resolution[layer]
             if last_layer_res != layer_res:
                 if layer_res != segmentation_output_res:
                     mask = torch.nn.functional.interpolate(
