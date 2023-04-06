@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from criteria.utils.segmentation_utils import *
 from models.facial_recognition.model_irse import Backbone
+import torchvision
 
 
 def _load_gan_linear_segmentation(model_path):
@@ -63,7 +64,9 @@ def get_semantic_parts(text):
     # returns the semantic parts according to the given text
 
     # FaceSegmentation ffhq
-    return [
+    return [["hair"]]
+
+    [
         ["mouth", "u_lip", "l_lip"],
         ["skin"],
         ["l_eye", "r_eye"],
@@ -265,5 +268,35 @@ class LocalizationLoss(nn.Module):
 
             # -1.0 means perfect localization and 0 means poor localization
             localization_loss = torch.mean(localization_loss)
+
+            print("Localization loss: {}.".format(localization_loss))
+
+            pil_to_tensor = torchvision.transforms.ToTensor()
+
+            old_image = pil_to_tensor(batch_data["image"].resize((256, 256)))
+            old_mask_image = (
+                torch.nn.functional.interpolate(
+                    old_mask, size=(256, 256), mode="bilinear", align_corners=True
+                )[0]
+                .repeat(3, 1, 1)
+                .detach()
+                .cpu()
+            )
+            new_image = pil_to_tensor(new_batch_data["image"].resize((256, 256)))
+            new_mask_image = (
+                torch.nn.functional.interpolate(
+                    new_mask, size=(256, 256), mode="bilinear", align_corners=True
+                )[0]
+                .repeat(3, 1, 1)
+                .detach()
+                .cpu()
+            )
+            images = [old_image, old_mask_image, new_image, new_mask_image]
+            image_grid = torchvision.utils.make_grid(images, nrow=2)
+            torchvision.utils.save_image(
+                image_grid,
+                os.path.join(self.log_dir, f"batch={1}-image_alpha={1:.2f}.jpg"),
+            )
+
         return localization_loss
         return loss / count, sim_improvement / count
