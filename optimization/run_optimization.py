@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 from criteria.clip_loss import CLIPLoss
 from criteria.id_loss import IDLoss
+from criteria.localization_loss import LocalizationLoss
 from mapper.training.train_utils import STYLESPACE_DIMENSIONS
 from models.stylegan2.model import Generator
 import clip
@@ -74,6 +75,7 @@ def main(args):
 
     clip_loss = CLIPLoss(args)
     id_loss = IDLoss(args)
+    localization_loss = LocalizationLoss(args)
 
     if args.work_in_stylespace:
         optimizer = optim.Adam(latent, lr=args.lr)
@@ -92,9 +94,11 @@ def main(args):
             input_is_latent=True,
             randomize_noise=False,
             input_is_stylespace=args.work_in_stylespace,
+            return_all_layers=True,
         )
 
         c_loss = clip_loss(result_gen["image"], text_inputs)
+        loc_loss = localization_loss(result_orig, result_gen, text_inputs)
 
         if args.id_lambda > 0:
             i_loss = id_loss(result_gen["image"], result_orig["image"])[0]
@@ -111,7 +115,7 @@ def main(args):
                 )
             else:
                 l2_loss = ((latent_code_init - latent) ** 2).sum()
-            loss = c_loss + args.l2_lambda * l2_loss + args.id_lambda * i_loss
+            loss = c_loss + args.l2_lambda * loc_loss + args.id_lambda * i_loss
         else:
             loss = c_loss
 
@@ -217,8 +221,12 @@ if __name__ == "__main__":
         type=str,
         help="Path to facial recognition network used in ID loss",
     )
-    # parser.add_argument('--segmentation_model', default='linear_segmentation', type=str,
-    #                          help="Which segmentation model to use, either linear_segmentation, face_segmentation or stuff_segmentation")
+    parser.add_argument(
+        "--segmentation_model",
+        default="face_segmentation",
+        type=str,
+        help="Which segmentation model to use, either linear_segmentation, face_segmentation or stuff_segmentation",
+    )
 
     args = parser.parse_args()
 

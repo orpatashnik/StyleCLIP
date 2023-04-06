@@ -604,7 +604,7 @@ class Generator(nn.Module):
         else:
             return result, None
 
-        # TODO: change image to result['image'] wherever used
+        # TODO: change image to result['image'] wherever used (done for run_optimization.py)
 
         # if return_latents:
         #    return image, latent, style_vector
