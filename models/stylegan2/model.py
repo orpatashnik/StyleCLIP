@@ -480,7 +480,7 @@ class Generator(nn.Module):
         input_is_stylespace=False,
         noise=None,
         randomize_noise=True,
-        return_all_layers=False,
+        return_all_layers=True,
     ):
         if not input_is_latent and not input_is_stylespace:
             styles = [self.style(s) for s in styles]
@@ -551,6 +551,7 @@ class Generator(nn.Module):
             i = 2
 
         if return_all_layers:
+            #print('Shape of layer 1: {}'.format(skip.shape))
             result[f"layer_{1}"] = skip  # OR out ??
 
         for ind, (conv1, conv2, noise1, noise2, to_rgb) in enumerate(
@@ -592,6 +593,7 @@ class Generator(nn.Module):
                 i += 3
 
             if return_all_layers:
+                #print('Shape of layer {}: {}'.format(ind+2, skip.shape))
                 result[f"layer_{ind+2}"] = skip  # OR out ??
 
         image = skip
