@@ -174,7 +174,9 @@ class LocalizationLoss(nn.Module):
         last_layer_res = None
         localization_loss = 0
         localization_layers = list(range(1, 10))
-        localization_layer_weights = np.array([1.0] * len(localization_layers))
+        localization_layer_weights = np.array(
+            [0.0] * (len(localization_layers) - 1) + [1.0]
+        )
         layer_to_resolution = {
             0: 4,
             1: 4,
@@ -186,14 +188,6 @@ class LocalizationLoss(nn.Module):
             7: 256,
             8: 512,
             9: 1024,
-            10: 128,
-            11: 128,
-            12: 256,
-            13: 256,
-            14: 512,
-            15: 512,
-            16: 1024,
-            17: 1024,
         }
         loss_functions = ["L1", "L2", "cos"]
         loss_function = loss_functions[1]
@@ -290,40 +284,38 @@ class LocalizationLoss(nn.Module):
 
             # print("Localization loss: {}.".format(localization_loss))
 
-            pil_to_tensor = torchvision.transforms.ToTensor()
+        pil_to_tensor = torchvision.transforms.ToTensor()
 
-            # print('Image shape: {}.'.format(batch_data["image"].shape))
+        # print('Image shape: {}.'.format(batch_data["image"].shape))
 
-            old_image = pil_to_tensor(raw_image_to_pil_image(batch_data["image"])[0])
-            old_mask_image = (
-                torch.nn.functional.interpolate(
-                    old_mask, size=(1024, 1024), mode="bilinear", align_corners=True
-                )[0]
-                .repeat(3, 1, 1)
-                .detach()
-                .cpu()
+        old_image = pil_to_tensor(raw_image_to_pil_image(batch_data["image"])[0])
+        old_mask_image = (
+            torch.nn.functional.interpolate(
+                old_mask, size=(1024, 1024), mode="bilinear", align_corners=True
+            )[0]
+            .repeat(3, 1, 1)
+            .detach()
+            .cpu()
+        )
+        new_image = pil_to_tensor(raw_image_to_pil_image(new_batch_data["image"])[0])
+        new_mask_image = (
+            torch.nn.functional.interpolate(
+                new_mask, size=(1024, 1024), mode="bilinear", align_corners=True
+            )[0]
+            .repeat(3, 1, 1)
+            .detach()
+            .cpu()
+        )
+        if self.opts.export_segmentation_image:
+            images = [old_image, old_mask_image, new_image, new_mask_image]
+            image_grid = torchvision.utils.make_grid(images, nrow=2)
+            torchvision.utils.save_image(
+                image_grid,
+                os.path.join(
+                    self.opts.results_dir,
+                    f"seg_{str(i).zfill(5)}_loc_loss={localization_loss.item():.4f}.jpg",
+                ),
             )
-            new_image = pil_to_tensor(
-                raw_image_to_pil_image(new_batch_data["image"])[0]
-            )
-            new_mask_image = (
-                torch.nn.functional.interpolate(
-                    new_mask, size=(1024, 1024), mode="bilinear", align_corners=True
-                )[0]
-                .repeat(3, 1, 1)
-                .detach()
-                .cpu()
-            )
-            if self.opts.export_segmentation_image:
-                images = [old_image, old_mask_image, new_image, new_mask_image]
-                image_grid = torchvision.utils.make_grid(images, nrow=2)
-                torchvision.utils.save_image(
-                    image_grid,
-                    os.path.join(
-                        self.opts.results_dir,
-                        f"seg_{str(i).zfill(5)}_loc_loss={localization_loss.item():.4f}.jpg",
-                    ),
-                )
 
         return localization_loss
         return loss / count, sim_improvement / count
