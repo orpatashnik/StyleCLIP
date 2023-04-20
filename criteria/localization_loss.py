@@ -121,14 +121,16 @@ def get_semantic_parts(text):
     pass
 
 
-def combine_mask(mask1, mask2, method="average"):
-    assert method in ["average", "union", "intersection"]
+def combine_mask(mask1, mask2, method="left_only"):
+    assert method in ["average", "union", "intersection", "left_only"]
     if method == "average":
         return 0.5 * mask1 + 0.5 * mask2
     elif method == "intersection":
         return mask1 * mask2
-    else:
+    elif method == "union":
         return mask1 + mask2 - mask1 * mask2
+    else:
+        return mask1
 
 
 def raw_image_to_pil_image(raw_img):
@@ -191,7 +193,7 @@ class LocalizationLoss(nn.Module):
         }
         loss_functions = ["L1", "L2", "cos"]
         loss_function = loss_functions[1]
-        mode = ""
+        mode = "background"
 
         if isinstance(self.segmentation_model, GANLinearSegmentation):
             old_segmentation_output = self.segmentation_model.predict(
@@ -227,7 +229,7 @@ class LocalizationLoss(nn.Module):
         for part_idx in part_ids:
             new_mask += 1.0 * (new_segmentation_output == part_idx)
 
-        mask_aggregation = "average"
+        mask_aggregation = "left_only"
 
         combined_mask = combine_mask(old_mask, new_mask, mask_aggregation)
 
@@ -273,13 +275,11 @@ class LocalizationLoss(nn.Module):
             # print('1st term: {}'.format(torch.sum(diff * indicator, dim=[1, 2])))
             # print('2nd term: {}'.format(torch.sum(diff, dim=[1, 2]) + 1e-6))
 
-            localization_loss -= (
-                layer_weight
-                * torch.sum(diff * indicator, dim=[1, 2])[0]
-                / (torch.sum(diff, dim=[1, 2]) + 1e-6)[0]
+            localization_loss = (
+                layer_weight * torch.sum(diff * indicator, dim=[1, 2])[0]
             )
 
-            # -1.0 means perfect localization and 0 means poor localization
+            # 0.0 means perfect localization and 1.0 means poor localization
             localization_loss = torch.mean(localization_loss)
 
             # print("Localization loss: {}.".format(localization_loss))
