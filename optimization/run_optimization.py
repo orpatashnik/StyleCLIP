@@ -98,7 +98,7 @@ def main(args):
         )
 
         c_loss = clip_loss(result_gen["image"], text_inputs)
-        loc_loss = localization_loss(result_orig, result_gen, text_inputs)
+        loc_loss = localization_loss(result_orig, result_gen, text_inputs, i)
 
         if args.id_lambda > 0:
             i_loss = id_loss(result_gen["image"], result_orig["image"])[0]
@@ -115,7 +115,12 @@ def main(args):
                 )
             else:
                 l2_loss = ((latent_code_init - latent) ** 2).sum()
-            loss = c_loss + args.l2_lambda * loc_loss + args.id_lambda * i_loss
+            loss = (
+                c_loss
+                + args.l2_lambda * l2_loss
+                + args.id_lambda * i_loss
+                + args.loc_lambda * loc_loss
+            )
         else:
             loss = c_loss
 
@@ -123,7 +128,9 @@ def main(args):
         loss.backward()
         optimizer.step()
 
-        pbar.set_description((f"loss: {loss.item():.4f};"))
+        pbar.set_description(
+            (f"loss: {loss.item():.4f}, loc_loss: {loc_loss.item():.4f};")
+        )
         if (
             args.save_intermediate_image_every > 0
             and i % args.save_intermediate_image_every == 0
@@ -193,6 +200,12 @@ if __name__ == "__main__":
         help="weight of id loss (used for editing only)",
     )
     parser.add_argument(
+        "--loc_lambda",
+        type=float,
+        default=0.000,
+        help="weight of localization loss (used for editing only)",
+    )
+    parser.add_argument(
         "--latent_path",
         type=str,
         default=None,
@@ -226,6 +239,12 @@ if __name__ == "__main__":
         default="face_segmentation",
         type=str,
         help="Which segmentation model to use, either linear_segmentation, face_segmentation or stuff_segmentation",
+    )
+    parser.add_argument(
+        "--export_segmentation_image",
+        default="False",
+        type=bool,
+        help="Should we save the segmentation output image or not",
     )
 
     args = parser.parse_args()

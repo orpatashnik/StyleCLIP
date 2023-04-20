@@ -130,11 +130,12 @@ def combine_mask(mask1, mask2, method="average"):
     else:
         return mask1 + mask2 - mask1 * mask2
 
+
 def raw_image_to_pil_image(raw_img):
     img = (raw_img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
     pil_imgs = []
     for i in range(len(img)):
-        pil_imgs.append(Image.fromarray(img[i].cpu().numpy(), 'RGB'))
+        pil_imgs.append(Image.fromarray(img[i].cpu().numpy(), "RGB"))
     return pil_imgs
 
 
@@ -144,7 +145,7 @@ class LocalizationLoss(nn.Module):
         self.opts = opts
         print("Loading Segmentation Models")
         segmentation_model_string = opts.segmentation_model
-        self.device = torch.device('cuda')
+        self.device = torch.device("cuda")
         assert segmentation_model_string in [
             "linear_segmentation",
             "face_segmentation",
@@ -163,14 +164,13 @@ class LocalizationLoss(nn.Module):
             segmentation_model = _load_face_bisenet_model(
                 "pretrained/face_bisenet/model.pth"
             )
-            self.segmentation_model = FaceSegmentation(segmentation_model,self.device)
+            self.segmentation_model = FaceSegmentation(segmentation_model, self.device)
         # Add generator model to compute the localization on the different layers of the network
 
     ### Batch data should now be coming from the generator, instead of the direct image outoput of the gan
-    def forward(self, batch_data, new_batch_data, text):
+    def forward(self, batch_data, new_batch_data, text, i):
+        # print(batch_data.keys())
 
-        #print(batch_data.keys())
-        
         last_layer_res = None
         localization_loss = 0
         localization_layers = list(range(1, 10))
@@ -238,7 +238,7 @@ class LocalizationLoss(nn.Module):
         combined_mask = combine_mask(old_mask, new_mask, mask_aggregation)
 
         mask = combined_mask.clone()
-        
+
         # To maximize the Localization Score in localization layers
         for layer, layer_weight in zip(
             reversed(localization_layers), reversed(localization_layer_weights)
@@ -274,10 +274,10 @@ class LocalizationLoss(nn.Module):
             if mode == "background":
                 indicator = 1 - indicator
 
-            #print('Diff shape: {}'.format(diff.shape))
-            #print('Indicator shape: {}'.format(indicator.shape))
-            #print('1st term: {}'.format(torch.sum(diff * indicator, dim=[1, 2])))
-            #print('2nd term: {}'.format(torch.sum(diff, dim=[1, 2]) + 1e-6))
+            # print('Diff shape: {}'.format(diff.shape))
+            # print('Indicator shape: {}'.format(indicator.shape))
+            # print('1st term: {}'.format(torch.sum(diff * indicator, dim=[1, 2])))
+            # print('2nd term: {}'.format(torch.sum(diff, dim=[1, 2]) + 1e-6))
 
             localization_loss -= (
                 layer_weight
@@ -288,11 +288,11 @@ class LocalizationLoss(nn.Module):
             # -1.0 means perfect localization and 0 means poor localization
             localization_loss = torch.mean(localization_loss)
 
-            #print("Localization loss: {}.".format(localization_loss))
+            # print("Localization loss: {}.".format(localization_loss))
 
             pil_to_tensor = torchvision.transforms.ToTensor()
 
-            #print('Image shape: {}.'.format(batch_data["image"].shape))
+            # print('Image shape: {}.'.format(batch_data["image"].shape))
 
             old_image = pil_to_tensor(raw_image_to_pil_image(batch_data["image"])[0])
             old_mask_image = (
@@ -303,7 +303,9 @@ class LocalizationLoss(nn.Module):
                 .detach()
                 .cpu()
             )
-            new_image = pil_to_tensor(raw_image_to_pil_image(new_batch_data["image"])[0])
+            new_image = pil_to_tensor(
+                raw_image_to_pil_image(new_batch_data["image"])[0]
+            )
             new_mask_image = (
                 torch.nn.functional.interpolate(
                     new_mask, size=(1024, 1024), mode="bilinear", align_corners=True
@@ -312,12 +314,15 @@ class LocalizationLoss(nn.Module):
                 .detach()
                 .cpu()
             )
-            images = [old_image, old_mask_image, new_image, new_mask_image]
-            image_grid = torchvision.utils.make_grid(images, nrow=2)
-            torchvision.utils.save_image(
-                image_grid,
-                os.path.join(f"out/batch={1}-image_alpha={1:.2f}.jpg"),
-            )
+            if self.opts.export_segmentation_image:
+                images = [old_image, old_mask_image, new_image, new_mask_image]
+                image_grid = torchvision.utils.make_grid(images, nrow=2)
+                torchvision.utils.save_image(
+                    image_grid,
+                    os.path.join(
+                        f"results/seg_{str(i).zfill(5)}_loc_loss={localization_loss.item():.4f}.jpg"
+                    ),
+                )
 
         return localization_loss
         return loss / count, sim_improvement / count
