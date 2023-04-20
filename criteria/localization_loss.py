@@ -320,7 +320,8 @@ class LocalizationLoss(nn.Module):
                 torchvision.utils.save_image(
                     image_grid,
                     os.path.join(
-                        f"results/seg_{str(i).zfill(5)}_loc_loss={localization_loss.item():.4f}.jpg"
+                        self.opts.results_dir,
+                        f"seg_{str(i).zfill(5)}_loc_loss={localization_loss.item():.4f}.jpg",
                     ),
                 )
 

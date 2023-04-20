@@ -1,6 +1,7 @@
 import argparse
 import math
 import os
+import shutil
 
 import torch
 import torchvision
@@ -33,6 +34,7 @@ def get_lr(t, initial_lr, rampdown=0.25, rampup=0.05):
 def main(args):
     ensure_checkpoint_exists(args.ckpt)
     text_inputs = torch.cat([clip.tokenize(args.description)]).cuda()
+    shutil.rmtree(args.results_dir, ignore_errors=True)
     os.makedirs(args.results_dir, exist_ok=True)
 
     g_ema = Generator(args.stylegan_size, 512, 8)
@@ -145,7 +147,7 @@ def main(args):
 
             torchvision.utils.save_image(
                 result_gen["image"],
-                f"results/{str(i).zfill(5)}.jpg",
+                os.path.join(args.results_dir, f"{str(i).zfill(5)}.jpg"),
                 normalize=True,
                 range=(-1, 1),
             )
