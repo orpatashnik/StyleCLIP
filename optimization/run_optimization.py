@@ -118,7 +118,7 @@ def main(args):
             else:
                 l2_loss = ((latent_code_init - latent) ** 2).sum()
             loss = (
-                c_loss
+                args.clip_lambda * c_loss
                 + args.l2_lambda * l2_loss
                 + args.id_lambda * i_loss
                 + args.loc_lambda * loc_loss
@@ -190,6 +190,12 @@ if __name__ == "__main__":
         help="choose between edit an image an generate a free one",
     )
     parser.add_argument(
+        "--clip_lambda",
+        type=float,
+        default=0.008,
+        help="weight of clip loss (used for editing only)",
+    )
+    parser.add_argument(
         "--l2_lambda",
         type=float,
         default=0.008,
@@ -241,6 +247,12 @@ if __name__ == "__main__":
         default="face_segmentation",
         type=str,
         help="Which segmentation model to use, either linear_segmentation, face_segmentation or stuff_segmentation",
+    )
+    parser.add_argument(
+        "--semantic_part",
+        default="hair",
+        type=str,
+        help="which semantic part to use for the localization loss",
     )
     parser.add_argument(
         "--export_segmentation_image",

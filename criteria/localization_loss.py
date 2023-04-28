@@ -149,25 +149,35 @@ class LocalizationLoss(nn.Module):
         segmentation_model_string = opts.segmentation_model
         self.device = torch.device("cuda")
         assert segmentation_model_string in [
-            "linear_segmentation",
             "face_segmentation",
             "stuff_segmentation",
         ]
-        if segmentation_model_string == "linear_segmentation":
-            # TODO: Add model path
-            segmentation_model = _load_gan_linear_segmentation("")
-            self.segmentation_model = GANLinearSegmentation(
-                segmentation_model, data_source="face"
+        if segmentation_model_string == "stuff_segmentation":
+            segmentation_model = _load_cocostuff_deeplabv2(
+                "pretrained/cocostuff_deeplab/deeplabv2_resnet101_msc-cocostuff164k-100000.pth"
             )
-        elif segmentation_model_string == "stuff_segmentation":
-            segmentation_model = _load_cocostuff_deeplabv2("")
             self.segmentation_model = StuffSegmentation(segmentation_model)
         elif segmentation_model_string == "face_segmentation":
             segmentation_model = _load_face_bisenet_model(
                 "pretrained/face_bisenet/model.pth"
             )
             self.segmentation_model = FaceSegmentation(segmentation_model, self.device)
-        # Add generator model to compute the localization on the different layers of the network
+        self.semantic_part = opts.semantic_part
+
+    def get_semantic_parts(self, text):
+        # returns the semantic parts according to the given text
+        parts = {
+            "mouth": ["mouth", "u_lip", "l_lip"],
+            "skin": ["skin"],
+            "eyes": ["l_eye", "r_eye"],
+            "nose": ["nose"],
+            "ears": ["l_ear", "r_ear", "earrings"],
+            "eye_brows": ["l_brow", "r_brow"],
+            "hat": ["hair", "hat"],
+            "hair": ["hair"],
+            "neck": ["cloth", "neck", "necklace"],
+        }
+        return parts[self.semantic_part]
 
     ### Batch data should now be coming from the generator, instead of the direct image outoput of the gan
     def forward(self, batch_data, new_batch_data, text, i):
@@ -214,7 +224,7 @@ class LocalizationLoss(nn.Module):
                 raw_image_to_pil_image(new_batch_data["image"]), one_hot=False
             )
 
-        semantic_parts = get_semantic_parts(text)
+        semantic_parts = self.get_semantic_parts(text)
 
         part_ids = [
             self.segmentation_model.part_to_mask_idx[part_name]
