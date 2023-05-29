@@ -11,7 +11,7 @@ from tqdm import tqdm
 from criteria.clip_loss import CLIPLoss
 from criteria.id_loss import IDLoss
 from criteria.localization_loss import LocalizationLoss
-from mapper.training.train_utils import STYLESPACE_DIMENSIONS
+from models.stylegan2.model import STYLESPACE_DIMENSIONS
 from models.stylegan2.model import Generator
 import clip
 from utils import ensure_checkpoint_exists
@@ -153,7 +153,7 @@ def main(args):
             )
             with torch.no_grad():
                 result_gen05, _ = g_ema(
-                    [latent_code_init + 0.5*(latent-latent_code_init)],
+                    [latent_code_init + 0.5 * (latent - latent_code_init)],
                     input_is_latent=True,
                     randomize_noise=False,
                     input_is_stylespace=args.work_in_stylespace,
@@ -167,7 +167,7 @@ def main(args):
             )
             with torch.no_grad():
                 result_gen2, _ = g_ema(
-                    [latent_code_init + (-1)*(latent-latent_code_init)],
+                    [latent_code_init + (-1) * (latent - latent_code_init)],
                     input_is_latent=True,
                     randomize_noise=False,
                     input_is_stylespace=args.work_in_stylespace,
@@ -181,7 +181,7 @@ def main(args):
             )
             with torch.no_grad():
                 result_gen3, _ = g_ema(
-                    [latent_code_init + (-0.5)*(latent-latent_code_init)],
+                    [latent_code_init + (-0.5) * (latent - latent_code_init)],
                     input_is_latent=True,
                     randomize_noise=False,
                     input_is_stylespace=args.work_in_stylespace,
@@ -195,9 +195,24 @@ def main(args):
             )
 
     if args.mode == "edit":
-        final_result = torch.cat([result_gen2["image"], result_gen3["image"], result_orig["image"], result_gen05["image"], result_gen["image"]])
+        final_result = torch.cat(
+            [
+                result_gen2["image"],
+                result_gen3["image"],
+                result_orig["image"],
+                result_gen05["image"],
+                result_gen["image"],
+            ]
+        )
     else:
-        final_result = torch.cat([result_gen05["image"], result_gen["image"], result_gen2["image"], result_gen3["image"]])
+        final_result = torch.cat(
+            [
+                result_gen05["image"],
+                result_gen["image"],
+                result_gen2["image"],
+                result_gen3["image"],
+            ]
+        )
 
     return final_result
 

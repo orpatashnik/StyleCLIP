@@ -7,6 +7,14 @@ from torch.nn import functional as F
 
 from models.stylegan2.op import FusedLeakyReLU, fused_leaky_relu, upfirdn2d
 
+STYLESPACE_DIMENSIONS = (
+    [512 for _ in range(15)]
+    + [256, 256, 256]
+    + [128, 128, 128]
+    + [64, 64, 64]
+    + [32, 32]
+)
+
 
 class PixelNorm(nn.Module):
     def __init__(self):
@@ -551,7 +559,7 @@ class Generator(nn.Module):
             i = 2
 
         if return_all_layers:
-            #print('Shape of layer 1: {}'.format(skip.shape))
+            # print('Shape of layer 1: {}'.format(skip.shape))
             result[f"layer_{1}"] = skip  # OR out ??
 
         for ind, (conv1, conv2, noise1, noise2, to_rgb) in enumerate(
@@ -593,7 +601,7 @@ class Generator(nn.Module):
                 i += 3
 
             if return_all_layers:
-                #print('Shape of layer {}: {}'.format(ind+2, skip.shape))
+                # print('Shape of layer {}: {}'.format(ind+2, skip.shape))
                 result[f"layer_{ind+2}"] = skip  # OR out ??
 
         image = skip
