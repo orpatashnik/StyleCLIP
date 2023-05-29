@@ -11,7 +11,7 @@ from tqdm import tqdm
 from criteria.clip_loss import CLIPLoss
 from criteria.id_loss import IDLoss
 from criteria.localization_loss import LocalizationLoss
-from mapper.training.train_utils import STYLESPACE_DIMENSIONS
+from models.stylegan2.model import STYLESPACE_DIMENSIONS
 from models.stylegan2.model import Generator
 import clip
 from utils import ensure_checkpoint_exists
