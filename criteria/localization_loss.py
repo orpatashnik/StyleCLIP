@@ -61,66 +61,6 @@ def _load_cocostuff_deeplabv2(model_path):
     return model
 
 
-def get_semantic_parts(text):
-    # returns the semantic parts according to the given text
-
-    # FaceSegmentation ffhq
-    return ["hair"]
-
-    [
-        ["mouth", "u_lip", "l_lip"],
-        ["skin"],
-        ["l_eye", "r_eye"],
-        ["nose"],
-        ["l_ear", "r_ear", "earrings"],
-        ["background"],
-        ["l_brow", "r_brow"],
-        ["hair", "hat"],
-        ["hair"],
-        ["cloth", "neck", "necklace"],
-        ["eyeglass"],
-    ]
-    # FaceSegmentation MetFaces
-    [
-        ["mouth", "u_lip", "l_lip"],
-        ["skin"],
-        ["l_eye", "r_eye"],
-        ["nose"],
-        ["l_ear", "r_ear", "earrings"],
-        ["background"],
-        ["l_brow", "r_brow"],
-        ["hair", "hat"],
-        ["hair"],
-        ["cloth", "neck", "necklace"],
-    ]
-
-    # stuff segmenation church
-    [
-        ["building-other", "house"],
-        ["sky-other", "clouds"],
-        ["tree", "grass", "bush", "plant-other"],
-        ["dirt", "mud", "sand", "gravel", "ground-other", "road", "pavement"],
-    ]
-
-    # stuff segmenation horse
-    [
-        ["horse"],
-        ["person"],
-        ["sky-other", "clouds"],
-        ["tree", "grass", "bush", "plant-other"],
-        ["dirt", "mud", "sand", "gravel", "ground-other", "road", "pavement"],
-    ]
-
-    # stuff segmenation car
-    [
-        ["car", "truck", "bus", "motorcycle"],
-        ["road", "pavement", "dirt"],
-        ["sky-other", "clouds"],
-        ["tree", "grass", "bush", "plant-other"],
-    ]
-    pass
-
-
 def combine_mask(mask1, mask2, method="left_only"):
     assert method in ["average", "union", "intersection", "left_only"]
     if method == "average":
