@@ -6,7 +6,7 @@ import shutil
 import torch
 import torchvision
 from torch import optim
-from tqdm import tqdm
+from tqdm.notebook import tqdm
 
 from criteria.clip_loss import CLIPLoss
 from criteria.id_loss import IDLoss
@@ -45,7 +45,7 @@ def main(args):
 
     if args.latent_path:
         latent_code_init = torch.load(args.latent_path).cuda()
-    elif args.mode == "edit":
+    else:
         latent_code_init_not_trunc = torch.randn(1, 512).cuda()
         with torch.no_grad():
             _, latent_code_init, _ = g_ema(
@@ -54,8 +54,6 @@ def main(args):
                 truncation=args.truncation,
                 truncation_latent=mean_latent,
             )
-    else:
-        latent_code_init = mean_latent.detach().clone().repeat(1, 18, 1)
 
     with torch.no_grad():
         result_orig, _ = g_ema(
@@ -107,31 +105,33 @@ def main(args):
         else:
             i_loss = 0
 
-        if args.mode == "edit":
-            if args.work_in_stylespace:
-                l2_loss = sum(
-                    [
-                        ((latent_code_init[c] - latent[c]) ** 2).sum()
-                        for c in range(len(latent_code_init))
-                    ]
-                )
-            else:
-                l2_loss = ((latent_code_init - latent) ** 2).sum()
-            loss = (
-                args.clip_lambda * c_loss
-                + args.l2_lambda * l2_loss
-                + args.id_lambda * i_loss
-                + args.loc_lambda * loc_loss
+        if args.work_in_stylespace:
+            l2_loss = sum(
+                [
+                    ((latent_code_init[c] - latent[c]) ** 2).sum()
+                    for c in range(len(latent_code_init))
+                ]
             )
         else:
-            loss = c_loss
+            l2_loss = ((latent_code_init - latent) ** 2).sum()
+        loss = (
+            args.clip_lambda * c_loss
+            + args.l2_lambda * l2_loss
+            + args.id_lambda * i_loss
+            + args.loc_lambda * loc_loss
+        )
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        latent_dir = (
+            [(latent_code_init[c] - latent[c]) for c in range(len(latent_code_init))]
+            if (args.work_in_stylespace)
+            else latent - latent_code_init
+        )
 
         pbar.set_description(
-            (f"loss: {loss.item():.4f}, loc_loss: {loc_loss.item():.4f};")
+            (f"loss: {loss.item():.4f}, loc_loss: {loc_loss.item():.1f};")
         )
         if (
             args.save_intermediate_image_every > 0
@@ -151,13 +151,29 @@ def main(args):
                 normalize=True,
                 range=(-1, 1),
             )
+    # note: the losses correspond to the loss just before the last optimization step
+    output = {
+        "orig_image": result_orig["image"],
+        "orig_latent": latent_code_init,
+        "gen_image": result_gen["image"],
+        "latent_dir": latent_dir,
+        "losses": {
+            "loss": loss,
+            "c_loss": c_loss,
+            "i_loss": i_loss,
+            "l2_loss": l2_loss,
+            "loc_loss": loc_loss,
+        },
+        "lambdas": {
+            "clip_lambda": args.clip_lambda,
+            "id_lambda": args.id_lambda,
+            "l2_lambda": args.l2_lambda,
+            "loc_lambda": args.loc_lambda,
+        },
+        "generator": g_ema,
+    }
 
-    if args.mode == "edit":
-        final_result = torch.cat([result_orig["image"], result_gen["image"]])
-    else:
-        final_result = result_gen["image"]
-
-    return final_result
+    return output
 
 
 if __name__ == "__main__":
@@ -181,13 +197,6 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, default=0.1)
     parser.add_argument(
         "--step", type=int, default=300, help="number of optimization steps"
-    )
-    parser.add_argument(
-        "--mode",
-        type=str,
-        default="edit",
-        choices=["edit", "free_generation"],
-        help="choose between edit an image an generate a free one",
     )
     parser.add_argument(
         "--clip_lambda",
@@ -249,8 +258,8 @@ if __name__ == "__main__":
         help="Which segmentation model to use, either linear_segmentation, face_segmentation or stuff_segmentation",
     )
     parser.add_argument(
-        "--semantic_part",
-        default="hair",
+        "--semantic_parts",
+        default=["hair"],
         type=str,
         help="which semantic part to use for the localization loss",
     )

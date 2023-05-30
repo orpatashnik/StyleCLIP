@@ -117,7 +117,12 @@ class LocalizationLoss(nn.Module):
             "hair": ["hair"],
             "neck": ["cloth", "neck", "necklace"],
         }
-        return parts[self.semantic_part]
+        semantic_parts = []
+        for semantic_parts in self.semantic_parts:
+            if semantic_parts in parts.keys():
+                semantic_parts += parts[semantic_parts]
+
+        return semantic_parts
 
     ### Batch data should now be coming from the generator, instead of the direct image outoput of the gan
     def forward(self, batch_data, new_batch_data, text, i):
@@ -268,4 +273,3 @@ class LocalizationLoss(nn.Module):
             )
 
         return localization_loss
-        return loss / count, sim_improvement / count
