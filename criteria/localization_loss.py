@@ -102,7 +102,7 @@ class LocalizationLoss(nn.Module):
                 "pretrained/face_bisenet/model.pth"
             )
             self.segmentation_model = FaceSegmentation(segmentation_model, self.device)
-        self.semantic_part = opts.semantic_part
+        self.semantic_parts = opts.semantic_parts
 
     def get_semantic_parts(self, text):
         # returns the semantic parts according to the given text
@@ -118,9 +118,9 @@ class LocalizationLoss(nn.Module):
             "neck": ["cloth", "neck", "necklace"],
         }
         semantic_parts = []
-        for semantic_parts in self.semantic_parts:
-            if semantic_parts in parts.keys():
-                semantic_parts += parts[semantic_parts]
+        for semantic_part in self.semantic_parts:
+            if semantic_part in parts.keys():
+                semantic_parts += parts[semantic_part]
 
         return semantic_parts
 
